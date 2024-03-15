@@ -4,11 +4,11 @@ const ImageLoader = () => {
   const [image, setImage] = useState(null);
 
   const handleImageChange = (event) => {
-    const file = event.target.files[0];
+    const file = document.getElementById("dropzone-file").files[0];
     const reader = new FileReader();
 
     reader.onloadend = () => {
-      setImage(reader.result);
+      setImage(file);
     };
 
     if (file) {
@@ -17,15 +17,27 @@ const ImageLoader = () => {
   };
 
   const handleSubmit = () => {
-    // Aquí deberías enviar la imagen al servidor
-    // Por ahora, solo mostramos la imagen en la consola
-    console.log('Enviando imagen al servidor:', image);
-  };
+    //enviar al server
+	const formdata = new FormData();
+	formdata.append("file", image, image.name);
+
+	const requestOptions = {
+		method: "POST",
+		body: formdata,
+	};
+
+	fetch("http://192.168.100.7:8000/image/upload", requestOptions)
+		.then((response) => response.text())
+		.then((result) => {
+			localStorage.setItem("image", image.name);
+		})
+		.catch((error) => console.error(error));
+	};
 
   return (
 		<div className="flex flex-col items-center">
 			
-			<div class="flex items-center justify-center w-full">
+			{image == null && <div class="flex items-center justify-center w-full">
 				<label
 					for="dropzone-file"
 					class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
@@ -57,16 +69,16 @@ const ImageLoader = () => {
 					<input
 						id="dropzone-file"
 						type="file"
-						accept="image/*"
+						accept="*"
 						onChange={handleImageChange}
 						class="hidden"
 					/>
 				</label>
-			</div>
+			</div>}
 
 			{image && (
-				<div className="mb-4">
-					<img src={image} alt="Preview" className="max-w-full max-h-64" />
+				<div className="mb-4 text-black">
+					{image.name} - {(image.size/1000000).toFixed(2)} MB
 				</div>
 			)}
 			{image && (

@@ -1,0 +1,7 @@
+flask
+imageio
+nibabel
+matplotlib
+pandas
+numpy
+flask-cors

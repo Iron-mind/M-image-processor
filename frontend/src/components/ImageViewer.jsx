@@ -1,21 +1,33 @@
 import React, { useState } from 'react';
 
 const ImageViewer = () => {
-  const [sliderValue, setSliderValue] = useState(0); // Valor inicial del slider
+  const [sliderValuex, setSliderValuex] = useState(0); // Valor inicial del slider
+  const [sliderValuey, setSliderValuey] = useState(0); // Valor inicial del slider
   const [images, setImages] = useState({
     cenital: null,
     sagital: null
   }); // Estado para almacenar las imágenes
 
   // Función para manejar el cambio en el slider
-  const handleSliderChange = (event) => {
+  const handleSliderChangex = (event) => {
     const value = event.target.value;
-    setSliderValue(value);
+    setSliderValuex(value);
     // Aquí deberías hacer una solicitud al servidor para obtener las imágenes correspondientes al valor del slider
     // Reemplaza esta línea con tu lógica para obtener las imágenes del servidor
     const newImages = {
-      cenital: `https://imgs.search.brave.com/YjueatGolKxK73oKyrGczJGywmCJwrnfenCalg9SUac/rs:fit:860:0:0/g:ce/aHR0cHM6Ly91cGxv/YWQud2lraW1lZGlh/Lm9yZy93aWtpcGVk/aWEvY29tbW9ucy85/Lzk3L1RhYy1kZS1s/YS1jYWJlemExLmpw/Zw`,
-      sagital: `https://imgs.search.brave.com/Jngkv6afL0LXVQt0YqQrL_DtqiUH3m3vcP9QM0Nuhmg/rs:fit:860:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5nZXR0eWltYWdl/cy5jb20vaWQvNTY5/NjE2NjEvZXMvZm90/by9tcmktZGVsLWNl/cmVicm8uanBnP3M9/NjEyeDYxMiZ3PTAm/az0yMCZjPThYdW9N/OEMwbzZtdkl6TF8w/LU92ODJkMXV1ZEVT/QXhFUTZkTjh3ZWFB/d1U9`
+	  ...images,
+      cenital: `http://192.168.100.7:8000/image/sub-01_T1w.nii?x=${value}`,
+    };
+    setImages(newImages);
+  };
+  const handleSliderChangey = (event) => {
+    const value = event.target.value;
+    setSliderValuey(value);
+    // Aquí deberías hacer una solicitud al servidor para obtener las imágenes correspondientes al valor del slider
+    // Reemplaza esta línea con tu lógica para obtener las imágenes del servidor
+    const newImages = {
+	  ...images,
+      sagital: `http://192.168.100.7:8000/image/sub-01_T1w.nii?y=${value}`,
     };
     setImages(newImages);
   };
@@ -30,7 +42,7 @@ const ImageViewer = () => {
 							src={images.cenital}
 							alt="Cenital"
 							width={480}
-              height={320}
+              				height={320}
 						/>
 					)}
 				</div>
@@ -41,21 +53,32 @@ const ImageViewer = () => {
 							src={images.sagital}
 							alt="Sagital"
 							width={480}
-              height={320}
+              				height={320}
 						/>
 					)}
 				</div>
 			</div>
-
-			<input
-        title={""+sliderValue}
-				type="range"
-				min={0}
-				max={100}
-				value={sliderValue}
-				onChange={handleSliderChange}
-				className="w-80"
-			/>
+			<div className='row'>
+				<input
+					title={""+sliderValuex}
+					type="range"
+					min={50}
+					max={170}
+					value={sliderValuex}
+					onChange={handleSliderChangex}
+					className="w-80"
+				/>
+				<input
+					title={""+sliderValuey}
+					type="range"
+					min={50}
+					max={170}
+					value={sliderValuey}
+					onChange={handleSliderChangey}
+					className="w-80"
+				/>
+			</div>
+			
 		</div>
 	);
 };
