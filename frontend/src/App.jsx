@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+
 import './App.css'
+import ImageViewer from './components/ImageViewer'
+import ImageLoader from './components/FileLoader'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -9,25 +10,15 @@ function App() {
   return (
     <>
       <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount(count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
+        <h1 className="text-black text-lg">Upload an image Nifti</h1>
+        <ImageLoader />
+        <ImageViewer />
+        <br />
       </div>
       <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
+        Developed by Juan David Tovar (iron-mind)
       </p>
+        <a href="github.com/iron-mind" className='text-[#0075FF] '>Github</a>
     </>
   )
 }
