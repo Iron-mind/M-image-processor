@@ -1,22 +1,24 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const ImageViewer = () => {
-  const [sliderValuex, setSliderValuex] = useState(0); // Valor inicial del slider
-  const [sliderValuey, setSliderValuey] = useState(0); // Valor inicial del slider
+  const [sliderValuex, setSliderValuex] = useState(100); // Valor inicial del slider
+  const [sliderValuey, setSliderValuey] = useState(100); // Valor inicial del slider
+  const [imageName, setImageName] = useState(localStorage.getItem("image")); // Estado para almacenar el nombre de la imagen
   const [images, setImages] = useState({
-    cenital: null,
-    sagital: null
+    cenital: `http://localhost:8000/image/${imageName}?x=100`,
+    sagital: `http://localhost:8000/image/${imageName}?y=100`
   }); // Estado para almacenar las imágenes
-
   // Función para manejar el cambio en el slider
   const handleSliderChangex = (event) => {
     const value = event.target.value;
     setSliderValuex(value);
     // Aquí deberías hacer una solicitud al servidor para obtener las imágenes correspondientes al valor del slider
     // Reemplaza esta línea con tu lógica para obtener las imágenes del servidor
+	
     const newImages = {
 	  ...images,
-      cenital: `http://192.168.100.7:8000/image/sub-01_T1w.nii?x=${value}`,
+      cenital: `http://localhost:8000/image/${imageName}?x=${value}`,
     };
     setImages(newImages);
   };
@@ -25,15 +27,17 @@ const ImageViewer = () => {
     setSliderValuey(value);
     // Aquí deberías hacer una solicitud al servidor para obtener las imágenes correspondientes al valor del slider
     // Reemplaza esta línea con tu lógica para obtener las imágenes del servidor
+	
     const newImages = {
 	  ...images,
-      sagital: `http://192.168.100.7:8000/image/sub-01_T1w.nii?y=${value}`,
+      sagital: `http://localhost:8000/image/${imageName}?y=${value}`,
     };
     setImages(newImages);
   };
 
   return (
 		<div className="flex flex-col items-center justify-center">
+			<h1 className='text-lg text-black m-4'>Viewer</h1>
 			<div className="flex justify-center mb-4">
 				<div className="mr-4">
 					{images.cenital && (
@@ -77,6 +81,14 @@ const ImageViewer = () => {
 					onChange={handleSliderChangey}
 					className="w-80"
 				/>
+			</div>
+			<div className='row'>
+				<Link className='mx-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded' to="/">
+					Apply thraceholding
+				</Link>
+				<Link className='mx-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded my-4' to="/edit">Drawer</Link>
+				<Link className='mx-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded my-4' to="/edit">Drawer</Link>
+				<Link className='mx-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded my-4' to="/edit">Drawer</Link>
 			</div>
 			
 		</div>

@@ -1,6 +1,7 @@
 
 from flask import Flask, jsonify, request, send_file
 import imageio
+
 import nibabel as nib
 import pandas as pd
 import numpy as np
@@ -32,9 +33,8 @@ def get_imagen(filename):
         matriz = img[:,:,int(y)]
     else:
         matriz = img[int(x),:,:]
-
     # Convierte la matriz a una imagen WebP
-    imagen_webp = imageio.imwrite("<bytes>", matriz, format="webp")
+    imagen_webp = imageio.imwrite("<bytes>", matriz, format="webp", lossless=True, method=6)
     output_filename = "draft.webp"
 
 # Save the WebP image to the output directory
