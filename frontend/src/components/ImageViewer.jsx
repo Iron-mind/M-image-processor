@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import ThresholdingViewer from './ThresholdingViewer';
+import Navbar from './Navbar';
 
 const ImageViewer = () => {
   const [sliderValuex, setSliderValuex] = useState(100); // Valor inicial del slider
@@ -43,6 +44,7 @@ const ImageViewer = () => {
 
   return (
 		<div className="flex flex-col items-center justify-center mt-9">
+			<Navbar />
 			<h1 className='text-lg text-black m-4'>Viewer</h1>
 			<div className="flex justify-center mb-4">
 				<div className="mr-4">
@@ -117,7 +119,7 @@ const ImageViewer = () => {
 			</div>
 			{
                 input.thApllyed &&
-				<ThresholdingViewer id="thv" threshold={170} />
+				<ThresholdingViewer id="thv" threshold={input.tau} />
 			}
 			
 		</div>

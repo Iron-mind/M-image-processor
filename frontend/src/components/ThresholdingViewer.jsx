@@ -1,5 +1,6 @@
 import React from 'react';
 import { useState } from 'react';
+import Navbar from './Navbar';
 
 const ThresholdingViewer = ({threshold}) => {
     const [sliderValuex, setSliderValuex] = useState(100); // Valor inicial del slider
@@ -34,6 +35,7 @@ const ThresholdingViewer = ({threshold}) => {
   };
     return (
         <div className='mt-8' id="thv">
+			<Navbar />
             <h1 className='text-black'>Thresholding Viewer</h1>
             <div className="flex justify-center mb-4">
 				<div className="mr-4">

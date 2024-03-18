@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Navbar from './Navbar';
 
 const ImageLoader = () => {
   const [image, setImage] = useState(null);
@@ -28,19 +29,18 @@ const ImageLoader = () => {
 	};
 
 	fetch("http://192.168.100.7:8000/image/upload", requestOptions)
-		.then((response) => response.text())
-		.then((result) => {
+		.then((response) =>{
 			setUploading(false);
 			
 			localStorage.setItem("image", image.name);
 			setImage(null);
-			window.location.href = "/view/";
 		})
 		.catch((error) => console.error(error));
 	};
 
   return (
 		<div className="flex flex-col items-center">
+			<Navbar />
 			{image == null && (
 				<div class="flex items-center justify-center w-full">
 					<label
