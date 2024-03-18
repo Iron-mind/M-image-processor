@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 import os
 from flask_cors import CORS
-from methods import isodata
+from methods import isodata, k_means
 
 app = Flask(__name__, static_folder='dist/assets', template_folder='dist')
 
@@ -116,6 +116,32 @@ def apply_thresholding(filename):
     # Retorna la imagen como respuesta al GET
     return send_file("cache/draft.webp", mimetype="image/webp")
 
+@app.route("/image/kmeans/<filename>")
+def apply_kmeans(filename):
+    try:
+        img = nib.load("./cache/"+filename)
+        x = request.args.get("x")
+        y = request.args.get("y")
+        k_values = request.args.get("kvalues")
+    except:
+        return "Image not found"
+
+    img = img.get_fdata()
+    # Selecciona la matriz deseada
+    k_values = [float(v) for v in k_values.split(",")]
+    if y is not None:
+        matriz = k_means(img[:,:,int(y)], k_values)
+    else:
+        matriz = k_means(img[int(x),:,:], k_values)
+     # Convierte la matriz a una imagen WebP
+    imagen_webp = imageio.imwrite("<bytes>", matriz, format="webp", lossless=True, method=6)
+    output_filename = "draft.webp"
+
+# Save the WebP image to the output directory
+    with open(os.path.join("cache", output_filename), "wb") as f:
+        f.write(imagen_webp)
+    # Retorna la imagen como respuesta al GET
+    return send_file("cache/draft.webp", mimetype="image/webp")
 
 @app.route('/')
 def page():

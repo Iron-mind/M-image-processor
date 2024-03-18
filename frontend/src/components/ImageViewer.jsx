@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import ThresholdingViewer from './ThresholdingViewer';
 import Navbar from './Navbar';
+import KMeansViewer from './KMeansViewer';
 
 const ImageViewer = () => {
   const [sliderValuex, setSliderValuex] = useState(100); // Valor inicial del slider
@@ -15,8 +16,8 @@ const ImageViewer = () => {
 
   const [input, setInput] = useState({
 	tau: 0,
-	k: 0,
 	kValues: [],
+	stringkValues: "",
 	thApllyed: false,
   }); // Estado para almacenar el valor del input
   // Función para manejar el cambio en el slider
@@ -57,34 +58,22 @@ const ImageViewer = () => {
   return (
 		<div className="flex flex-col items-center justify-center mt-9">
 			<Navbar />
-			<h1 className='text-lg text-black m-4'>Viewer</h1>
+			<h1 className="text-lg text-black m-4">Viewer</h1>
 			<div className="flex justify-center mb-4">
 				<div className="mr-4">
 					{images.cenital && (
-						<img
-							
-							src={images.cenital}
-							alt="Cenital"
-							width={480}
-              				height={320}
-						/>
+						<img src={images.cenital} alt="Cenital" width={720} height={320} />
 					)}
 				</div>
 				<div>
 					{images.sagital && (
-						<img
-							
-							src={images.sagital}
-							alt="Sagital"
-							width={480}
-              				height={320}
-						/>
+						<img src={images.sagital} alt="Sagital" width={720} height={320} />
 					)}
 				</div>
 			</div>
-			<div className='row my-7'>
+			<div className="row my-7">
 				<input
-					title={""+sliderValuex}
+					title={"" + sliderValuex}
 					type="range"
 					min={50}
 					max={170}
@@ -92,11 +81,9 @@ const ImageViewer = () => {
 					onChange={handleSliderChangex}
 					className="w-80 mx-2"
 				/>
-				<span className='text-black'>
-					{sliderValuex}
-				</span>
+				<span className="text-black">{sliderValuex}</span>
 				<input
-					title={""+sliderValuey}
+					title={"" + sliderValuey}
 					type="range"
 					min={50}
 					max={170}
@@ -104,39 +91,89 @@ const ImageViewer = () => {
 					onChange={handleSliderChangey}
 					className="w-80 mx-2"
 				/>
-				<span className='text-black'>
-					{sliderValuey}
-				</span>
+				<span className="text-black">{sliderValuey}</span>
 			</div>
-			<div className='flex flex-row'>
-				<div className='flex flex-col w-[300px]'>
-
-					<div className='my-2'>
-						<label htmlFor="tau" className='text-black mx-3'>Tau value</label>
-						<input onChange={(e)=>{setInput({...input, tau:e.target.value, thApllyed:false})}} className="w-[100px] text-black" type="number" id="tau" name="tau" min="0" value={input.tau}/>
-
+			<div className="flex flex-row">
+				<div className="flex flex-col w-[300px]">
+					<div className="my-2">
+						<label htmlFor="tau" className="text-black mx-3">
+							Tau value
+						</label>
+						<input
+							onChange={(e) => {
+								setInput({ ...input, tau: e.target.value, thApllyed: false });
+							}}
+							className="w-[100px] text-black"
+							type="number"
+							id="tau"
+							name="tau"
+							min="0"
+							value={input.tau}
+						/>
 					</div>
-					{loadingTau ? "Calculating":<button  onClick={getBestTau} className='mx-4 my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded' >
-						Find the best
-					</button>}
-					<a href="#thv" onClick={()=>{setInput({...input, thApllyed:true})}} className='mx-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded' >
+					{loadingTau ? (
+						"Calculating"
+					) : (
+						<button
+							onClick={getBestTau}
+							className="mx-4 my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+						>
+							Find the best
+						</button>
+					)}
+					<a
+						href="#thv"
+						onClick={() => {
+							setInput({ ...input, thApllyed: true });
+						}}
+						className="mx-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+					>
 						Apply thraceholding
 					</a>
 				</div>
-				<div className='flex flex-col w-[300px]'>
-					<Link className='row mx-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded my-4' to="/processor">K-means</Link>
-					
+				<div className="flex flex-col w-[300px]">
+				<div className="my-2">
+						<label htmlFor="stringkValues" className="text-black mx-3">
+							k initail values
+						</label>
+						<input
+							onChange={(e) => {
+								setInput({ ...input, stringkValues: e.target.value, kValues:[], thApllyed: false });
+							}}
+							className="w-[100px] text-black"
+							type="text"
+							id="stringkValues"
+							name="stringkValues"
+							
+							value={input.stringkValues}
+						/>
+					</div>
+					<a
+						href="#kms"
+						className="row mx-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded my-4"
+						onClick={() => {
+							alert(input.stringkValues);
+							setInput({ ...input, kValues: input.stringkValues.split(",").map(Number) });
+						}
+						}
+					>
+						Make k groups
+					</a>
 				</div>
-				<div className='flex flex-col w-[300px]'>
-					<Link className='row mx-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded my-4' to="/processor">Drawer</Link>
-					
+				<div className="flex flex-col w-[300px]">
+					<Link
+						className="row mx-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded my-4"
+						to="/processor"
+					>
+						Drawer
+					</Link>
 				</div>
 			</div>
+			{input.thApllyed && <ThresholdingViewer threshold={input.tau} />}
 			{
-                input.thApllyed &&
-				<ThresholdingViewer id="thv" threshold={input.tau} />
+				input.kValues.length > 0 &&
+				<KMeansViewer kValues={input.kValues}/>
 			}
-			
 		</div>
 	);
 };

@@ -1,14 +1,15 @@
 import React from 'react';
 import { useState } from 'react';
+import Navbar from './Navbar';
 
 
-const ThresholdingViewer = ({threshold}) => {
+const KMeansViewer = ({kValues}) => {
     const [sliderValuex, setSliderValuex] = useState(100); // Valor inicial del slider
   const [sliderValuey, setSliderValuey] = useState(100); // Valor inicial del slider
   const [imageName, setImageName] = useState(localStorage.getItem("image")); // Estado para almacenar el nombre de la imagen
   const [images, setImages] = useState({
-    cenital: `http://localhost:8000/image/th/${imageName}?x=100&th=${threshold}`,
-    sagital: `http://localhost:8000/image/th/${imageName}?y=100&th=${threshold}`
+    cenital: `http://localhost:8000/image/kmeans/${imageName}?x=100&kvalues=${kValues}`,
+    sagital: `http://localhost:8000/image/kmeans/${imageName}?y=100&kvalues=${kValues}`
   }); 
 
   const handleSliderChangex = (event) => {
@@ -17,7 +18,7 @@ const ThresholdingViewer = ({threshold}) => {
     
     const newImages = {
 	  ...images,
-      cenital: `http://localhost:8000/image/th/${imageName}?x=${value}&th=${threshold}`,
+      cenital: `http://localhost:8000/image/kmeans/${imageName}?x=${value}&kvalues=${kValues}`,
     };
     setImages(newImages);
   };
@@ -29,14 +30,14 @@ const ThresholdingViewer = ({threshold}) => {
 	
     const newImages = {
 	  ...images,
-      sagital: `http://localhost:8000/image/th/${imageName}?y=${value}&th=${threshold}`,
+      sagital: `http://localhost:8000/image/kmeans/${imageName}?y=${value}&kvalues=${kValues}`,
     };
     setImages(newImages);
   };
     return (
-        <div className='mt-8' id="thv">
-			
-            <h1 className='text-black'>Thresholding Viewer</h1>
+        <div className='mt-8' id="kms">
+			<Navbar />
+            <h1 className='text-black'>K means Viewer</h1>
             <div className="flex justify-center mb-4">
 				<div className="mr-4">
 					{images.cenital && (
@@ -91,4 +92,4 @@ const ThresholdingViewer = ({threshold}) => {
     );
 };
 
-export default ThresholdingViewer;
+export default KMeansViewer;
