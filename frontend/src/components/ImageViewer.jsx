@@ -10,7 +10,8 @@ const ImageViewer = () => {
   const [images, setImages] = useState({
     cenital: `http://localhost:8000/image/${imageName}?x=100`,
     sagital: `http://localhost:8000/image/${imageName}?y=100`
-  }); 
+  });
+  const [loadingTau, setLoadingTau] = useState(false);
 
   const [input, setInput] = useState({
 	tau: 0,
@@ -41,6 +42,17 @@ const ImageViewer = () => {
     };
     setImages(newImages);
   };
+  function getBestTau() {
+	setLoadingTau(true);
+		fetch(`http://localhost:8000/image/best-tau/${imageName}`)
+			.then((response) => response.json())
+			.then((data) => {
+				setLoadingTau(false);
+				setInput({ ...input, tau: Number(data.tau).toFixed(2) });
+			})
+			.catch((error) => console.error(error));
+	}
+
 
   return (
 		<div className="flex flex-col items-center justify-center mt-9">
@@ -101,9 +113,12 @@ const ImageViewer = () => {
 
 					<div className='my-2'>
 						<label htmlFor="tau" className='text-black mx-3'>Tau value</label>
-						<input onChange={(e)=>{setInput({...input, tau:e.target.value, thApllyed:false})}} className="w-[100px] text-black" type="number" id="tau" name="tau" min="0" />
+						<input onChange={(e)=>{setInput({...input, tau:e.target.value, thApllyed:false})}} className="w-[100px] text-black" type="number" id="tau" name="tau" min="0" value={input.tau}/>
 
 					</div>
+					{loadingTau ? "Calculating":<button  onClick={getBestTau} className='mx-4 my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded' >
+						Find the best
+					</button>}
 					<a href="#thv" onClick={()=>{setInput({...input, thApllyed:true})}} className='mx-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded' >
 						Apply thraceholding
 					</a>

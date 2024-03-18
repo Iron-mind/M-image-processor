@@ -8,6 +8,7 @@ import pandas as pd
 import numpy as np
 import os
 from flask_cors import CORS
+from methods import isodata
 
 app = Flask(__name__, static_folder='dist/assets', template_folder='dist')
 
@@ -16,6 +17,17 @@ CORS(app, origins=["http://localhost:5173"])
 
 
 # url example: /imagen/sub-01_T1w.nii?y=110
+@app.route("/image/best-tau/<filename>")
+def best_tau(filename):
+   
+    try:
+        img = nib.load("./cache/"+filename)
+        img = img.get_fdata()
+    except:
+        return "Image not found"
+    
+    return jsonify({"tau":isodata(img)})
+
 @app.route("/image/<filename>")
 def get_imagen(filename):
     # Carga la imagen NIfTI
@@ -84,7 +96,7 @@ def apply_thresholding(filename):
     img = img.get_fdata()
   
     if th is not None:
-        thn = int(th)
+        thn = float(th)
     else:
         return "Threshold not found"
     img_th = img > thn
@@ -104,10 +116,11 @@ def apply_thresholding(filename):
     # Retorna la imagen como respuesta al GET
     return send_file("cache/draft.webp", mimetype="image/webp")
 
+
 @app.route('/')
 def page():
     return render_template( 'index.html')
-    return send_from_directory('dist', 'index.html')
+  
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000, debug=True)
