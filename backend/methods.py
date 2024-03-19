@@ -1,4 +1,5 @@
 
+
 import numpy as np
 
 
@@ -47,3 +48,59 @@ def k_means(matriz, ik_values):
             k_means[i] = np.mean(k_values[i])
     print(k_means)
     return new_matriz
+
+
+def region_growing(matriz, seed_points, tol):
+    # Creamos una matriz de ceros del mismo tamaño que la matriz original
+    region = [[0] * len(matriz[0]) for _ in range(len(matriz))]
+
+    # Función para verificar si un punto está dentro de los límites de la matriz
+    def dentro_limites(x, y):
+        return 0 <= x < len(matriz) and 0 <= y < len(matriz[0])
+
+    # Función para calcular el promedio de los puntos seleccionados
+    def calcular_promedio(selected_points):
+
+        total = sum(selected_points)
+        if total== 0:
+          return 0
+        return total / len(selected_points)
+
+    # Función para verificar si un punto adyacente cumple con la condición y agregarlo a la lista de puntos seleccionados
+    def revisar_adyacentes(x, y, promedio):
+      adyacentes_por_visitar = [(x, y)]
+      while adyacentes_por_visitar:
+          nx, ny = adyacentes_por_visitar.pop()
+          adyacentes = [(nx+1, ny), (nx-1, ny), (nx, ny+1), (nx, ny-1)]
+          for px, py in adyacentes:
+              if dentro_limites(px, py) and region[px][py] == 0:
+                  if abs(matriz[px][py] - promedio) < tol:
+                      region[px][py] = 1
+                      selected_points.append(matriz[px][py])
+                      adyacentes_por_visitar.append((px, py))
+
+
+    # Iteramos sobre los puntos de inicio (seed_points)
+    for sx, sy in seed_points:
+        # Paso 1: Agregamos el punto de inicio a la lista de puntos seleccionados
+        selected_points = [matriz[sx][sy]]
+        region[sx][sy] = 1
+
+
+        # Paso 3: Calculamos el promedio de los puntos seleccionados
+        promedio = calcular_promedio(selected_points)
+        # if promedio == 0:
+        #   promedio = selected_points[0]
+        #   print(promedio)
+
+        # Paso 4: Aplicamos los pasos 1 y 2 a cada uno de los nuevos puntos seleccionados
+        while selected_points:
+            new_seed_points = [(x, y) for x in range(len(matriz)) for y in range(len(matriz[0])) if region[x][y] == 1]
+            selected_points = []
+            for nx, ny in new_seed_points:
+                revisar_adyacentes(nx, ny, promedio)
+    
+    print("Region growing")
+    # plt.imshow(np.array(region).astype(np.uint8))
+    # plt.savefig('./cache/draft_g.jpg')
+    return np.array(region).astype(np.uint8) 

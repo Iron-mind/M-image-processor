@@ -132,19 +132,23 @@ const ImageViewer = () => {
 					</a>
 				</div>
 				<div className="flex flex-col w-[300px]">
-				<div className="my-2">
+					<div className="my-2">
 						<label htmlFor="stringkValues" className="text-black mx-3">
-							k initail values
+							Initail k values
 						</label>
 						<input
 							onChange={(e) => {
-								setInput({ ...input, stringkValues: e.target.value, kValues:[], thApllyed: false });
+								setInput({
+									...input,
+									stringkValues: e.target.value,
+									kValues: [],
+									thApllyed: false,
+								});
 							}}
-							className="w-[100px] text-black"
+							className="w-[160px] text-black"
 							type="text"
 							id="stringkValues"
 							name="stringkValues"
-							
 							value={input.stringkValues}
 						/>
 					</div>
@@ -152,10 +156,11 @@ const ImageViewer = () => {
 						href="#kms"
 						className="row mx-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded my-4"
 						onClick={() => {
-							alert(input.stringkValues);
-							setInput({ ...input, kValues: input.stringkValues.split(",").map(Number) });
-						}
-						}
+							setInput({
+								...input,
+								kValues: input.stringkValues.split(",").map(Number),
+							});
+						}}
 					>
 						Make k groups
 					</a>
@@ -170,10 +175,7 @@ const ImageViewer = () => {
 				</div>
 			</div>
 			{input.thApllyed && <ThresholdingViewer threshold={input.tau} />}
-			{
-				input.kValues.length > 0 &&
-				<KMeansViewer kValues={input.kValues}/>
-			}
+			{input.kValues.length > 0 && <KMeansViewer kValues={input.kValues} />}
 		</div>
 	);
 };

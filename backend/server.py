@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 import os
 from flask_cors import CORS
-from methods import isodata, k_means
+from methods import isodata, k_means, region_growing
 
 app = Flask(__name__, static_folder='dist/assets', template_folder='dist')
 
@@ -142,6 +142,75 @@ def apply_kmeans(filename):
         f.write(imagen_webp)
     # Retorna la imagen como respuesta al GET
     return send_file("cache/draft.webp", mimetype="image/webp")
+
+
+@app.route("/image/<filename>/sizes")
+def get_sizes(filename):
+    try:
+        img = nib.load("./cache/"+filename)
+        v = request.args.get("view")
+    except:
+        return "Image not found"
+    img = img.get_fdata()
+    
+    if v == "x":
+        w,h = img[0,:,:].shape
+    else:
+        h,w = img[:,:,0].shape
+
+    print({"w":w,"h":h})
+    return jsonify({"w":w,"h":h})
+
+
+@app.route("/image/<filename>/region-growing", methods=["POST"])
+def apply_region_growing(filename):
+    points = []
+    x = None
+    y = None
+    if request.method == "POST":
+        try:
+            
+            img = nib.load("./cache/"+filename)
+            data = request.json
+            view = data["view"]
+            if view == "cenital":
+                x = data["x"]
+            else :
+                y = data["y"]
+            points = data["points"]
+            # print(data)
+        except KeyError as e :
+            print(e)
+            
+        img = img.get_fdata()
+        print(points[0])
+        points = [(round(p[0]/3), round(p[1]/3)) for p in points] # /3 because the image is 3 times bigger than the original from frontend
+        
+
+        # Selecciona la matriz deseada
+        if y is not None:
+            
+            matriz = region_growing(img[:,:,int(y)], points, 18)
+        else:
+            
+            matriz = region_growing(img[int(x),:,:], points, 18)
+        plt.imshow(matriz)
+        random_name = "draft_g-"+str(np.random.randint(0,20))+".jpg"
+        plt.savefig('./cache/'+random_name)
+        # Convierte la matriz a una imagen WebP
+        
+        # imagen_webp = imageio.imwrite("<bytes>", matriz, format="webp")
+        # output_filename = "draft_g.webp"
+        # # Save the WebP image to the output directory
+        # with open(os.path.join("cache", output_filename), "wb") as f:
+        #     f.write(imagen_webp)
+        # # Retorna la imagen como respuesta al GET
+        return  jsonify({"msg":"Region growing", "filename":random_name})
+    
+@app.route("/image/cache/<filename>")
+def get_cache(filename):
+    return send_from_directory("cache", filename)
+    
 
 @app.route('/')
 def page():
