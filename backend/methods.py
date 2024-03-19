@@ -53,8 +53,6 @@ def k_means(matriz, ik_values):
 def region_growing(matriz, seed_points, tol):
     # Creamos una matriz de ceros del mismo tamaño que la matriz original
     region = [[0] * len(matriz[0]) for _ in range(len(matriz))]
-
-    # Función para verificar si un punto está dentro de los límites de la matriz
     def dentro_limites(x, y):
         return 0 <= x < len(matriz) and 0 <= y < len(matriz[0])
 
@@ -104,3 +102,8 @@ def region_growing(matriz, seed_points, tol):
     # plt.imshow(np.array(region).astype(np.uint8))
     # plt.savefig('./cache/draft_g.jpg')
     return np.array(region).astype(np.uint8) 
+
+def scale_matrix(matrix):
+    scaled_matrix = (matrix - matrix.min()) * (255 / (matrix.max() - matrix.min()))
+    
+    return np.clip(scaled_matrix,0,255)

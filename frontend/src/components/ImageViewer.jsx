@@ -62,7 +62,7 @@ const ImageViewer = () => {
 			<div className="flex justify-center mb-4">
 				<div className="mr-4">
 					{images.cenital && (
-						<img src={images.cenital} alt="Cenital" width={720} height={320} />
+						<img src={images.cenital} alt="Cenital" width={720} height={320} className="contrast-120" />
 					)}
 				</div>
 				<div>

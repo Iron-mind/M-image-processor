@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 import os
 from flask_cors import CORS
-from methods import isodata, k_means, region_growing
+from methods import isodata, k_means, region_growing, scale_matrix
 
 app = Flask(__name__, static_folder='dist/assets', template_folder='dist')
 
@@ -45,9 +45,12 @@ def get_imagen(filename):
     else:
         matriz = img[int(x),:,:]
     # Convierte la matriz a una imagen WebP
+    matriz = scale_matrix(matriz)
+
+    
     imagen_webp = imageio.imwrite("<bytes>", matriz, format="webp", lossless=True, method=6)
     output_filename = "draft.webp"
-
+    
 # Save the WebP image to the output directory
     with open(os.path.join("cache", output_filename), "wb") as f:
         f.write(imagen_webp)
@@ -107,14 +110,14 @@ def apply_thresholding(filename):
         matriz = img_th[:,:,int(y)]
     else:
         matriz = img_th[int(x),:,:]
-    imagen_webp = imageio.imwrite("<bytes>", matriz, format="webp", lossless=True, method=6)
-    output_filename = "draft.webp"
 
-# Save the WebP image to the output directory
-    with open(os.path.join("cache", output_filename), "wb") as f:
-        f.write(imagen_webp)
+    matriz = scale_matrix(matriz)
+    plt.imshow(matriz)
+    fname = "draft.jpg"
+    plt.savefig('./cache/'+fname)
+
     # Retorna la imagen como respuesta al GET
-    return send_file("cache/draft.webp", mimetype="image/webp")
+    return send_file("cache/draft.jpg", mimetype="image/jpg")
 
 @app.route("/image/kmeans/<filename>")
 def apply_kmeans(filename):
@@ -133,15 +136,11 @@ def apply_kmeans(filename):
         matriz = k_means(img[:,:,int(y)], k_values)
     else:
         matriz = k_means(img[int(x),:,:], k_values)
-     # Convierte la matriz a una imagen WebP
-    imagen_webp = imageio.imwrite("<bytes>", matriz, format="webp", lossless=True, method=6)
-    output_filename = "draft.webp"
-
-# Save the WebP image to the output directory
-    with open(os.path.join("cache", output_filename), "wb") as f:
-        f.write(imagen_webp)
-    # Retorna la imagen como respuesta al GET
-    return send_file("cache/draft.webp", mimetype="image/webp")
+     # Convierte la matriz a una imagen 
+    plt.imshow(matriz)
+    fname = "draft.jpg"
+    plt.savefig('./cache/'+fname)
+    return send_file("cache/draft.jpg", mimetype="image/jpg")
 
 
 @app.route("/image/<filename>/sizes")
@@ -184,7 +183,7 @@ def apply_region_growing(filename):
             
         img = img.get_fdata()
         print(points[0])
-        points = [(round(p[0]/3), round(p[1]/3)) for p in points] # /3 because the image is 3 times bigger than the original from frontend
+        points = [(round(p[1]/3), round(p[0]/3)) for p in points] # /3 because the image is 3 times bigger than the original from frontend
         
 
         # Selecciona la matriz deseada
@@ -194,17 +193,12 @@ def apply_region_growing(filename):
         else:
             
             matriz = region_growing(img[int(x),:,:], points, 18)
+
         plt.imshow(matriz)
         random_name = "draft_g-"+str(np.random.randint(0,20))+".jpg"
         plt.savefig('./cache/'+random_name)
         # Convierte la matriz a una imagen WebP
         
-        # imagen_webp = imageio.imwrite("<bytes>", matriz, format="webp")
-        # output_filename = "draft_g.webp"
-        # # Save the WebP image to the output directory
-        # with open(os.path.join("cache", output_filename), "wb") as f:
-        #     f.write(imagen_webp)
-        # # Retorna la imagen como respuesta al GET
         return  jsonify({"msg":"Region growing", "filename":random_name})
     
 @app.route("/image/cache/<filename>")

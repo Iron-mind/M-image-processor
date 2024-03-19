@@ -37,14 +37,14 @@ const ThresholdingViewer = ({threshold}) => {
         <div className='mt-8' id="thv">
 			
             <h1 className='text-black'>Thresholding Viewer</h1>
-            <div className="flex justify-center mb-4">
+            <div className="flex justify-center mb-4 w-[1600px]">
 				<div className="mr-4">
 					{images.cenital && (
 						<img
 							
 							src={images.cenital}
 							alt="Cenital"
-							width={720} 
+							width={900} 
               				height={320}
 						/>
 					)}
@@ -55,7 +55,7 @@ const ThresholdingViewer = ({threshold}) => {
 							
 							src={images.sagital}
 							alt="Sagital"
-							width={720} 
+							width={900} 
               				height={320}
 						/>
 					)}

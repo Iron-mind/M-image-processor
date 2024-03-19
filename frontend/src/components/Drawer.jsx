@@ -182,7 +182,7 @@ const Drawer = () => {
 					</div>
 				</div>
                    { 
-                  
+                   growingReady &&
                    <div className='flex flex-row justify-center'>
                         <img src={images.growing} alt="regional growing - mediacal image" width={sizes.w*3 +300}/>
                     </div>

@@ -38,7 +38,7 @@ const KMeansViewer = ({kValues}) => {
         <div className='mt-8' id="kms">
 			<Navbar />
             <h1 className='text-black'>K means Viewer</h1>
-            <div className="flex justify-center mb-4">
+            <div className="flex justify-center mb-4 w-[1600px]">
 				<div className="mr-4">
 					{images.cenital && (
 						<img
