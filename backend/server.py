@@ -4,7 +4,6 @@ import imageio
 
 from matplotlib import pyplot as plt
 import nibabel as nib
-import pandas as pd
 import numpy as np
 import os
 from flask_cors import CORS
