@@ -36,6 +36,7 @@ def get_imagen(filename):
         x = request.args.get("x")
         y = request.args.get("y")
     except:
+        print("Image not found")
         return "Image not found"
 
     img = img.get_fdata()

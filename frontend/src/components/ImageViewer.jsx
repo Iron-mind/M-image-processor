@@ -112,7 +112,7 @@ const ImageViewer = () => {
 						/>
 					</div>
 					{loadingTau ? (
-						"Calculating"
+						<span className='text-black'>Calculating...</span>
 					) : (
 						<button
 							onClick={getBestTau}
@@ -128,7 +128,7 @@ const ImageViewer = () => {
 						}}
 						className="mx-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
 					>
-						Apply thraceholding
+						Apply thresholding
 					</a>
 				</div>
 				<div className="flex flex-col w-[300px]">
