@@ -33,10 +33,25 @@ const ThresholdingViewer = ({threshold}) => {
     };
     setImages(newImages);
   };
+  let getThresdholdingResult = () => {
+		fetch(
+			`http://localhost:8000/image/cache/thresholding-res.nii`
+		)
+		.then((response) => response.blob())
+		.then((blob) => {
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.href = url;
+			let prefix = imageName.split(".")[0];
+			a.download = prefix+"_th_res.nii";
+			a.click();
+		})
+		.catch((error) => console.error(error));
+	};
     return (
         <div className='mt-8' id="thv">
 			
-            <h1 className='text-black'>Thresholding Viewer</h1>
+            <h1 className='text-lg font-bold text-black'>Thresholding Viewer</h1>
             <div className="flex justify-center mb-4 w-[1600px]">
 				<div className="mr-4">
 					{images.cenital && (
@@ -87,6 +102,11 @@ const ThresholdingViewer = ({threshold}) => {
 					{sliderValuey}
 				</span>
 			</div>
+			<button 
+				onClick={getThresdholdingResult}
+				className="mb-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+				Save result
+			</button>
         </div>
     );
 };

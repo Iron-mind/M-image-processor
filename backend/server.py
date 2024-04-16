@@ -105,13 +105,16 @@ def apply_thresholding(filename):
         return "Threshold not found"
     img_th = img > thn
     img_th = np.where(img_th, 400, 0).astype(float)
- 
+    
     # Selecciona la matriz deseada
     if y is not None:
         matriz = img_th[:,int(y),:]
     else:
         matriz = img_th[int(x),:,:]
 
+    # save new nii
+    new_nii = nib.Nifti1Image(img_th, affine=None)
+    nib.save(new_nii, "./cache/thresholding-res.nii")
     matriz = scale_matrix(matriz)
     plt.imshow(matriz)
     fname = "draft.jpg"
@@ -137,6 +140,7 @@ def apply_kmeans(filename):
         matriz = k_means(img[:,int(y),:], k_values)
     else:
         matriz = k_means(img[int(x),:,:], k_values)
+
      # Convierte la matriz a una imagen 
     plt.imshow(matriz)
     fname = "draft.jpg"
@@ -156,7 +160,7 @@ def get_sizes(filename):
     if v == "x":
         w,h = img[0,:,:].shape
     else:
-        h,w = img[:,:,0].shape
+        h,w = img[:,0,:].shape
 
     print({"w":w,"h":h})
     return jsonify({"w":w,"h":h})
