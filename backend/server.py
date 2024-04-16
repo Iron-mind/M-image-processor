@@ -7,7 +7,7 @@ import nibabel as nib
 import numpy as np
 import os
 from flask_cors import CORS
-from methods import isodata, k_means, region_growing, scale_matrix
+from methods import isodata, k_means, region_growing, region_growing_3d, scale_matrix
 
 app = Flask(__name__, static_folder='dist/assets', template_folder='dist')
 
@@ -31,6 +31,7 @@ def best_tau(filename):
 def get_imagen(filename):
     # Carga la imagen NIfTI
     try:
+        print(filename)
         img = nib.load("./cache/"+filename)
         x = request.args.get("x")
         y = request.args.get("y")
@@ -41,7 +42,7 @@ def get_imagen(filename):
     img = img.get_fdata()
     # Selecciona la matriz deseada
     if y is not None:
-        matriz = img[:,:,int(y)]
+        matriz = img[:,int(y),:]
     else:
         matriz = img[int(x),:,:]
     # Convierte la matriz a una imagen WebP
@@ -107,7 +108,7 @@ def apply_thresholding(filename):
  
     # Selecciona la matriz deseada
     if y is not None:
-        matriz = img_th[:,:,int(y)]
+        matriz = img_th[:,int(y),:]
     else:
         matriz = img_th[int(x),:,:]
 
@@ -133,7 +134,7 @@ def apply_kmeans(filename):
     # Selecciona la matriz deseada
     k_values = [float(v) for v in k_values.split(",")]
     if y is not None:
-        matriz = k_means(img[:,:,int(y)], k_values)
+        matriz = k_means(img[:,int(y),:], k_values)
     else:
         matriz = k_means(img[int(x),:,:], k_values)
      # Convierte la matriz a una imagen 
@@ -188,11 +189,17 @@ def apply_region_growing(filename):
 
         # Selecciona la matriz deseada
         if y is not None:
+            # matriz = region_growing(img[:,:,int(y)], points, 18)
+            matrix_3d = region_growing_3d(img, int(y), points, "y")
+            matriz = matrix_3d[:,int(y),:]
             
-            matriz = region_growing(img[:,:,int(y)], points, 18)
         else:
             
-            matriz = region_growing(img[int(x),:,:], points, 18)
+            matrix_3d = region_growing_3d(img, int(x), points, "x")
+            matriz = matrix_3d[int(x),:,:]
+
+        new_nii = nib.Nifti1Image(matrix_3d, affine=None)
+        nib.save(new_nii, "./cache/region-growing-res.nii")
 
         plt.imshow(matriz)
         random_name = "draft_g-"+str(np.random.randint(0,20))+".jpg"

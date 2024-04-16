@@ -6,7 +6,7 @@ import numpy as np
 def isodata(img):
     tau_t = 100
     delta = 100
-    tol = 0.001
+    tol = 0.01
     while tol < delta:
         img_th = img > tau_t
         m_foreground = img[img_th == 1].mean()
@@ -25,8 +25,8 @@ def k_means(matriz, ik_values):
   
     h,w = matriz.shape
     new_matriz = np.zeros(matriz.shape)
-    rang = np.max(matriz)
-    tol = 0.1
+    
+    tol = 0.001
 
     con = True
     while con:
@@ -49,6 +49,14 @@ def k_means(matriz, ik_values):
     print(k_means)
     return new_matriz
 
+  # Función para calcular el promedio de los puntos seleccionados
+def calcular_promedio(selected_points):
+
+    total = sum(selected_points)
+    if total== 0:
+        return 0
+    return total / len(selected_points)
+
 
 def region_growing(matriz, seed_points, tol):
     # Creamos una matriz de ceros del mismo tamaño que la matriz original
@@ -56,14 +64,7 @@ def region_growing(matriz, seed_points, tol):
     def dentro_limites(x, y):
         return 0 <= x < len(matriz) and 0 <= y < len(matriz[0])
 
-    # Función para calcular el promedio de los puntos seleccionados
-    def calcular_promedio(selected_points):
-
-        total = sum(selected_points)
-        if total== 0:
-          return 0
-        return total / len(selected_points)
-
+  
     # Función para verificar si un punto adyacente cumple con la condición y agregarlo a la lista de puntos seleccionados
     def revisar_adyacentes(x, y, promedio):
       adyacentes_por_visitar = [(x, y)]
@@ -102,6 +103,108 @@ def region_growing(matriz, seed_points, tol):
     # plt.imshow(np.array(region).astype(np.uint8))
     # plt.savefig('./cache/draft_g.jpg')
     return np.array(region).astype(np.uint8) 
+
+
+def region_growing_3d(img, startI, coordinates, axis):
+  tolerance = 25
+  aux_startI = startI
+  
+  annotation_img = np.zeros(img.shape)
+  if axis == "z":
+    img2d = img[:,:,startI]
+    annotation_img[:,:,startI] = region_growing(img2d,coordinates,tolerance )
+  elif axis == "x":
+    img2d = img[startI,:,:]
+    annotation_img[startI,:,:] = region_growing(img2d,coordinates,tolerance )
+  elif axis == "y":
+    img2d = img[:,startI,:]
+    annotation_img[:,startI,:] = region_growing(img2d,coordinates,tolerance )
+
+  img_length = len(img2d)
+  for i in range(50):
+    if startI-i < 0:
+      break
+    #case z
+    if axis == "z":
+        matriz = img[:,:,startI]
+        matriz_back = img[:,:,startI-1]
+    elif axis == "x":
+      matriz = img[startI,:,:]
+      matriz_back = img[startI-1,:,:]
+    elif axis == "y":
+        matriz = img[:,startI,:]
+        matriz_back = img[:,startI-1,:]
+    selected_p = []
+
+    for sx,sy in coordinates:
+      selected_p.append(matriz[sx,sy])
+
+    mean_sp = calcular_promedio(selected_p)
+
+    seed_points = []
+    for sx,sy in coordinates:
+      if abs(matriz_back[sx,sy] - mean_sp) < tolerance:
+        seed_points.append((sx,sy))
+
+    if len(seed_points)==0:
+      break
+
+    res = region_growing(matriz_back,seed_points,tolerance )
+    #z case
+    if axis == "z":
+        annotation_img[:,:,startI-1] = res
+    if axis == "x":
+      annotation_img[startI-1,:,:] = res
+    elif axis == "y":
+        annotation_img[:,startI-1,:] = res
+    startI -= 1
+
+  ## forward region
+  startI = aux_startI # asign startI again
+  for j in range(50):
+    if startI + j > img_length:
+      break
+    #case z
+    if axis == "z":
+        matriz = img[:,:,startI]
+        matriz_for = img[:,:,startI+1]
+
+    if axis == "x":
+        matriz = img[startI,:,:]
+        matriz_for = img[startI+1,:,:]
+    elif axis == "y":
+        matriz = img[:,startI,:]
+        matriz_for = img[:,startI+1,:]
+
+    selected_p = []
+
+    for sx,sy in coordinates:
+      selected_p.append(matriz[sx,sy])
+
+    mean_sp = calcular_promedio(selected_p)
+
+    seed_points = []
+    for sx,sy in coordinates:
+      if abs(matriz_for[sx,sy] - mean_sp) < tolerance:
+        seed_points.append((sx,sy))
+
+    if len(seed_points)==0:
+      break
+
+    res = region_growing(matriz_for,seed_points,tolerance )
+    #z case
+    if axis == "z":
+        annotation_img[:,:,startI+1] = res
+    if axis == "x":
+        annotation_img[startI+1,:,:] = res
+    elif axis == "y":
+        annotation_img[:,startI+1,:] = res
+
+    startI += 1
+  
+  return annotation_img
+
+
 
 def scale_matrix(matrix):
     scaled_matrix = (matrix - matrix.min()) * (255 / (matrix.max() - matrix.min()))
