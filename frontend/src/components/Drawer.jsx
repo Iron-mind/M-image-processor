@@ -87,6 +87,19 @@ const Drawer = () => {
             .catch((error) => console.error(error));
     }
 
+	function getRegionGrowingResult() {
+		fetch(`http://localhost:8000/image/cache/region-growing-res.nii`)
+			.then((response) => response.blob())
+			.then((blob) => {
+				const url = URL.createObjectURL(blob);
+				const a = document.createElement("a");
+				a.href = url;
+				let prefix = imageName.split(".")[0];
+				a.download = prefix+"_rgr.nii";
+				a.click();
+			})
+			.catch((error) => console.error(error));
+	}
     return (
 			<div className="mt-8" id="kms">
 				<Navbar />
@@ -116,8 +129,8 @@ const Drawer = () => {
 							<img
 								src={images.cenital}
 								alt="Cenital"
-								width={sizes.w * 3 }
-								height={sizes.h * 3 }
+								width={sizes.w * 3}
+								height={sizes.h * 3}
 								className="mb-8"
 							/>
 						)}{" "}
@@ -126,7 +139,7 @@ const Drawer = () => {
 							<img
 								src={images.sagital}
 								alt="sagital"
-								width={sizes.w * 3 }
+								width={sizes.w * 3}
 								height={sizes.h * 3}
 								className="mb-8 inline-block"
 							/>
@@ -170,9 +183,9 @@ const Drawer = () => {
 								onClick={() => {
 									if (points.length < 1) {
 										alert("Please select a point first");
-									}else {
-                                        applyRegionGrowing();
-                                    }
+									} else {
+										applyRegionGrowing();
+									}
 								}}
 								className="mx-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
 							>
@@ -180,13 +193,25 @@ const Drawer = () => {
 							</button>
 						</div>
 					</div>
+					
 				</div>
-                   { 
-                   growingReady &&
-                   <div className='flex flex-row justify-center'>
-                        <img src={images.growing} alt="regional growing - mediacal image" width={sizes.w*3 +300}/>
-                    </div>
-                    }
+				{growingReady && (
+					<div className="flex flex-col justify-center">
+						<img
+							src={images.growing}
+							alt="regional growing - mediacal image"
+							width={sizes.w * 3 + 300}
+						/>
+						<div  className="my-4">
+							<button 
+								onClick={getRegionGrowingResult}
+								className="my-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+								Save result
+							</button>
+						</div>
+					</div>
+					
+				)}
 			</div>
 		);
 };
