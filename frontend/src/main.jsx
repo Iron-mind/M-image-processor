@@ -5,6 +5,7 @@ import App from './App.jsx'
 import './index.css'
 import ImageViewer from './components/ImageViewer.jsx';
 import Drawer from './components/Drawer.jsx';
+import Standardization from './components/Standardization.jsx';
 const router = createBrowserRouter([
   {
     path: "/",
@@ -18,6 +19,10 @@ const router = createBrowserRouter([
   {
     path: "/processor/",
     element: <Drawer />,
+  },
+  {
+    path: "/standardizations/",
+    element: <Standardization />,
   },
   {
     path: "/*",

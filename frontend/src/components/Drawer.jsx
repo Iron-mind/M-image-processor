@@ -103,7 +103,7 @@ const Drawer = () => {
     return (
 			<div className="mt-8" id="kms">
 				<Navbar />
-				<h1 className="text-black">Growing region viewer</h1>
+				<h1 className="text-lg font-bold text-black">Growing region viewer</h1>
 
 				<div className="inline-flex rounded-md shadow-sm" role="group">
 					<button

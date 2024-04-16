@@ -7,7 +7,7 @@ import nibabel as nib
 import numpy as np
 import os
 from flask_cors import CORS
-from methods import isodata, k_means, region_growing, region_growing_3d, scale_matrix
+from methods import isodata, k_means, region_growing, region_growing_3d, scale_matrix, z_score_transform
 
 app = Flask(__name__, static_folder='dist/assets', template_folder='dist')
 
@@ -216,7 +216,45 @@ def apply_region_growing(filename):
 def get_cache(filename):
     return send_from_directory("cache", filename)
     
+@app.route("/image/z-score/<filename>")
+def apply_z_score(filename):
+    try:
+        img = nib.load("./cache/"+filename)
+       
+    except:
+        return "Image not found"
+    img = img.get_fdata()
+    print(type(img))
+    matrix_3d = z_score_transform(img)
 
+    new_nii = nib.Nifti1Image(matrix_3d, affine=None)
+    nib.save(new_nii, "./cache/z-score-res.nii")
+
+    
+    # Retorna la imagen como respuesta al GET
+    return jsonify({"msg":"Z-score transform"})
+    
+
+@app.route("/image/histogram/<filename>")
+def get_histogram(filename):
+    try:
+        img = nib.load("./cache/"+filename)
+    except:
+        return "Image not found"
+    
+    img = img.get_fdata()
+    # Selecciona la matriz deseada
+    min_t = img.min() #minimo trasformado (suele ser el cero el minimo)
+    max_t = img.max()
+    print(min_t)
+    plt.xlim(min_t, max_t)
+    new_img_f =img[img>min_t].flatten() 
+    # Convierte la matriz a una imagen WebP
+
+    plt.hist(new_img_f, 100)
+    fname = str(np.random.randint(0,20))+"hist.jpg"
+    plt.savefig('./cache/'+fname)
+    return send_file("cache/"+fname, mimetype="image/jpg")
 @app.route('/')
 def page():
     return render_template( 'index.html')

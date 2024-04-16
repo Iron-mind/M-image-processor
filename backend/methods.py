@@ -204,9 +204,20 @@ def region_growing_3d(img, startI, coordinates, axis):
   
   return annotation_img
 
+def z_score_transform(img:np.ndarray):
+  clean_img = img[img>0]
+  
+  mean_intensity = clean_img.mean()
+  std_intensity = clean_img.std()
 
+  mean_matrix = np.full(img.shape, mean_intensity)
+ 
+
+  new_img = (img - mean_matrix)/ std_intensity
+  
+
+  return new_img
 
 def scale_matrix(matrix):
     scaled_matrix = (matrix - matrix.min()) * (255 / (matrix.max() - matrix.min()))
-    
     return np.clip(scaled_matrix,0,255)

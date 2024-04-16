@@ -58,7 +58,7 @@ const ImageViewer = () => {
   return (
 		<div className="flex flex-col items-center justify-center mt-9">
 			<Navbar />
-			<h1 className="text-lg text-black m-4">Viewer</h1>
+			<h1 className="text-lg font-bold text-black m-4">Viewer</h1>
 			<div className="flex justify-center mb-4">
 				<div className="mr-4">
 					{images.cenital && (
@@ -134,7 +134,7 @@ const ImageViewer = () => {
 				<div className="flex flex-col w-[300px]">
 					<div className="my-2">
 						<label htmlFor="stringkValues" className="text-black mx-3">
-							Initail k values
+							Initial k values
 						</label>
 						<input
 							onChange={(e) => {
