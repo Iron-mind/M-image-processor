@@ -7,7 +7,7 @@ import nibabel as nib
 import numpy as np
 import os
 from flask_cors import CORS
-from methods import intensity_rescaling, isodata, k_means, region_growing, region_growing_3d, save_nii, scale_matrix, z_score_transform
+from methods import histogram_matching, intensity_rescaling, isodata, k_means, region_growing, region_growing_3d, save_nii, scale_matrix, z_score_transform
 
 app = Flask(__name__, static_folder='dist/assets', template_folder='dist')
 
@@ -248,7 +248,7 @@ def get_histogram(filename):
     # Selecciona la matriz deseada
     min_t = img.min() #minimo trasformado (suele ser el cero el minimo)
     max_t = img.max()
-    print(min_t)
+   
     plt.xlim(min_t, max_t)
     new_img_f =img[img>min_t].flatten() 
     # Convierte la matriz a una imagen WebP
@@ -276,6 +276,20 @@ def apply_intensity_rescaling(filename):
     # Retorna la imagen como respuesta al GET  
     return jsonify({"msg":"Intensity rescaling"})
 
+
+@app.route('/image/histogram-matching/<filename>')
+def apply_histogram_matching(filename):
+    try:
+        img = nib.load("./cache/"+filename)
+        
+    except:
+        return "Image not found"
+    img = img.get_fdata()
+    
+    matrix_3d = histogram_matching(img)
+    save_nii(matrix_3d, "./cache/histogram-matching-res.nii")
+      
+    return jsonify({"msg":"Histogram matching"})
 
 @app.route('/')
 def page():

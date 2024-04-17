@@ -1,7 +1,12 @@
 
 
+from matplotlib import pyplot as plt
 import numpy as np
 import nibabel as nib
+import scipy.stats as sp
+def scale_matrix(matrix):
+    scaled_matrix = (matrix - matrix.min()) * (255 / (matrix.max() - matrix.min()))
+    return np.clip(scaled_matrix,0,255)
 
 def isodata(img):
     tau_t = 100
@@ -235,6 +240,86 @@ def save_nii(img:np.ndarray, filename:str):
   nib.save(new_nii, filename)
   return True
 
-def scale_matrix(matrix):
-    scaled_matrix = (matrix - matrix.min()) * (255 / (matrix.max() - matrix.min()))
-    return np.clip(scaled_matrix,0,255)
+def histogram_matching(input_img:np.ndarray, test_img:np.ndarray):
+   
+   fs = h_training(input_img, 5)
+   x = np.linspace(5,100,5)
+   tes = h_testing(test_img, fs, x)
+   return tes
+ 
+def h_training(img:np.ndarray, k_pers):
+
+  x = np.linspace(5,100,k_pers)
+  y = np.percentile(img.flatten(),x)
+
+  m = (y[1]-y[0])/(x[1]-x[0])
+  b = y[0] - m*x[0]
+
+  fx1 = lambda x: m*x + b
+  
+  m2 = (y[2]-y[1])/(x[2]-x[1])
+  b2 = y[1] - m2*x[1]
+  fx2 = lambda x: m2*x + b2
+
+  m3 = (y[3]-y[2])/(x[3]-x[2])
+  b3 = y[2] - m3*x[2]
+  fx3 = lambda x: m3*x + b3
+
+  m4 = (y[4]-y[3])/(x[4]-x[3])
+  b4 = y[3] - m4*x[3]
+  fx4 = lambda x: m4*x + b4
+
+  print("x: ",x)
+  
+  return [ fx1,fx2,fx3,fx4]
+
+def h_testing(img:np.ndarray, functions, landmarks):
+  print(img.flatten().shape)
+  img_f =img.flatten() 
+  img_f_sorted = np.sort(img_f)
+  img_f_set = list(set(img_f_sorted ))
+  percentiles = sp.percentileofscore(img_f_set, img[:,:,120])
+  print(percentiles.shape, img.shape)
+  new_img = np.zeros(img[:,:,120].shape)
+
+  # new_img[percentiles > landmarks[0] and percentiles < landmarks[1]] = functions[0](percentiles[percentiles > landmarks[0] and percentiles < landmarks[1]])
+  for i in range(len(functions)):
+    if (percentiles > landmarks[i]).any() and (percentiles < landmarks[i+1]).any():
+        matching_indices = (percentiles > landmarks[i]) & (percentiles < landmarks[i+1])  # Efficient element-wise comparison
+        new_img[matching_indices] = functions[i](percentiles[matching_indices])
+  
+  return new_img
+  
+
+aux_img = nib.load("./cache/sub-p8-T1w.nii.gz")
+aux_img = aux_img.get_fdata()
+
+input_img = nib.load("./cache/sub-01_T1w.nii")
+input_img = input_img.get_fdata()
+
+aux = np.array([[1,3,4],[2,3,4],[3,4,5]])
+aux_test = np.array([[10,30,40],[20,30,40],[30,40,50]])
+
+# print(aux_img.shape, input_img.shape)
+# ni = histogram_matching(input_img=input_img, test_img=aux_img)
+# print(ni.min(), ni.max())
+# print(ni)
+# plt.hist(ni[ni>0].flatten(), bins=100)
+
+
+def white_stripe_standardization(matrix):
+    bins, counts, patches = plt.hist(matrix[matrix>50].flatten(),200)
+    bins_r = list(reversed(bins))
+    counts_r = list(reversed(counts))
+    ws_index = 0
+    tol= 100
+    for i in range(len(counts )- 3):
+      if bins_r[i] < bins_r[i+1] and bins_r[i+1] > bins_r[i+2]:
+        if (bins_r[i+1] -bins_r[i]) > tol and (bins_r[i+1] -bins_r[i+2]) > tol:
+          #print(bins_r[i],bins_r[i+1],bins_r[i+2], counts_r[i+1])
+          ws = counts_r[i+1]
+          break
+    
+   
+    new_img = matrix / ws
+    return new_img

@@ -5,6 +5,7 @@ import Navbar from './Navbar';
 import { Link } from 'react-router-dom';
 import { ZScore } from './ZScore';
 import { IntensityRescaling } from './IntensityRescaling';
+import { HistogramMatching } from './HistogramMatching';
 
 const Standardization = () => {
     const [sliderValuex, setSliderValuex] = useState(100); // Valor inicial del slider
@@ -67,6 +68,16 @@ const Standardization = () => {
             )
             .catch((error) => console.error(error));
     };
+
+    let applyHistogramMatching = () => {
+        fetch(`http://localhost:8000/image/histogram-matching/${imageName}`)
+            .then((response) => response.json())
+            .then((data) => {
+                alert("Histogram Matching applied");
+                setInput({ ...input, histogramMatching: true });
+            })
+            .catch((error) => console.error(error));
+    }
   
     return (
 			<div className="flex flex-col items-center justify-center mt-9">
@@ -134,6 +145,7 @@ const Standardization = () => {
                     </div>
                     <div className='flex flex-col w-[300px]'>
                         <button
+                        onClick={applyHistogramMatching}
                         className='mx-4 my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
                             Histogram Matching
                         </button>
@@ -151,6 +163,9 @@ const Standardization = () => {
                 </div>
                 <div className='flex flex-row'>
                         {input.zScore && <ZScore />}
+                </div>
+                <div className='flex flex-row'>
+                        {input.histogramMatching && <HistogramMatching/>}
                 </div>
                 
 			</div>
