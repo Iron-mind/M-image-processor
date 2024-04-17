@@ -4,10 +4,10 @@ import { useState } from 'react';
 import Navbar from './Navbar';
 import { Link } from 'react-router-dom';
 
-export const ZScore = () => {
+export const IntensityRescaling = () => {
 	const [sliderValuex, setSliderValuex] = useState(100); // Valor inicial del slider
 	const [sliderValuey, setSliderValuey] = useState(100); // Valor inicial del slider
-	const [imageName, setImageName] = useState("z-score-res.nii"); // Estado para almacenar el nombre de la imagen
+	const [imageName, setImageName] = useState("intensity-rescaling-res.nii"); // Estado para almacenar el nombre de la imagen
 	const filenamePrev = localStorage.getItem("image");
     const [images, setImages] = useState({
 		cenital: `http://localhost:8000/image/${imageName}?x=100`,
@@ -16,8 +16,7 @@ export const ZScore = () => {
 	const [loadingTau, setLoadingTau] = useState(false);
 
 	const [input, setInput] = useState({
-		tau: 0,
-		zScoreH: false,
+		
 		histogram:false
 		
 	}); // Estado para almacenar el valor del input
@@ -44,19 +43,11 @@ export const ZScore = () => {
 		};
 		setImages(newImages);
 	};
-    let getHistogram = async () => {
-        if (input.zScoreH) {
-            setInput({ ...input, zScoreH: false });
-        }
-        setTimeout(() => {
-             setInput({ ...input, zScoreH: true });
-         }, 1000);
-        
-    }
+
 	return (
 		<div className="flex flex-col items-center justify-center mt-9">
 			<Navbar />
-			<h1 className="text-lg font-bold text-black m-4">Z-score transformation</h1>
+			<h1 className="text-lg font-bold text-black m-4">Intensity rescaling</h1>
 			<div className="flex justify-center mb-4">
 				<div className="mr-4">
 					{images.cenital && (
@@ -97,13 +88,14 @@ export const ZScore = () => {
 				/>
 				<span className="text-black">{sliderValuey}</span>
 			</div>
-			<button onClick={getHistogram} className="mx-4 my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+			<button onClick={()=>{setInput({...input, histogram:true})}} className="mx-4 my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
 				Get Histogram
 			</button>
-            {input.zScoreH && (
+            {input.histogram && (
                 <div className='flex flex-row'>
 
-                    <img className='flex flex-col mx-2' src={"http://localhost:8000/image/histogram/"+imageName} alt="histogram zscore" />
+                    <img className='flex flex-col mx-2' src={"http://localhost:8000/image/histogram/"+imageName} alt="histogram" />
+                    
                     <img className='flex flex-col mx-2' src={"http://localhost:8000/image/histogram/"+filenamePrev} alt="histogram" />
                 </div>
             )

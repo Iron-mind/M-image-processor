@@ -7,7 +7,7 @@ import nibabel as nib
 import numpy as np
 import os
 from flask_cors import CORS
-from methods import isodata, k_means, region_growing, region_growing_3d, scale_matrix, z_score_transform
+from methods import intensity_rescaling, isodata, k_means, region_growing, region_growing_3d, save_nii, scale_matrix, z_score_transform
 
 app = Flask(__name__, static_folder='dist/assets', template_folder='dist')
 
@@ -113,8 +113,9 @@ def apply_thresholding(filename):
         matriz = img_th[int(x),:,:]
 
     # save new nii
-    new_nii = nib.Nifti1Image(img_th, affine=None)
-    nib.save(new_nii, "./cache/thresholding-res.nii")
+    save_nii(img_th, "./cache/thresholding-res.nii")
+    # new_nii = nib.Nifti1Image(img_th, affine=None)
+    # nib.save(new_nii, "./cache/thresholding-res.nii")
     matriz = scale_matrix(matriz)
     plt.imshow(matriz)
     fname = "draft.jpg"
@@ -202,8 +203,9 @@ def apply_region_growing(filename):
             matrix_3d = region_growing_3d(img, int(x), points, "x")
             matriz = matrix_3d[int(x),:,:]
 
-        new_nii = nib.Nifti1Image(matrix_3d, affine=None)
-        nib.save(new_nii, "./cache/region-growing-res.nii")
+        save_nii(matrix_3d, "./cache/region-growing-res.nii")
+        # new_nii = nib.Nifti1Image(matrix_3d, affine=None)
+        # nib.save(new_nii, "./cache/region-growing-res.nii")
 
         plt.imshow(matriz)
         random_name = "draft_g-"+str(np.random.randint(0,20))+".jpg"
@@ -226,9 +228,9 @@ def apply_z_score(filename):
     img = img.get_fdata()
     print(type(img))
     matrix_3d = z_score_transform(img)
-
-    new_nii = nib.Nifti1Image(matrix_3d, affine=None)
-    nib.save(new_nii, "./cache/z-score-res.nii")
+    save_nii(matrix_3d, "./cache/z-score-res.nii")
+    # new_nii = nib.Nifti1Image(matrix_3d, affine=None)
+    # nib.save(new_nii, "./cache/z-score-res.nii")
 
     
     # Retorna la imagen como respuesta al GET
@@ -255,6 +257,26 @@ def get_histogram(filename):
     fname = str(np.random.randint(0,20))+"hist.jpg"
     plt.savefig('./cache/'+fname)
     return send_file("cache/"+fname, mimetype="image/jpg")
+
+
+
+@app.route("/image/intensity-rescaling/<filename>")
+def apply_intensity_rescaling(filename):
+    try:
+        img = nib.load("./cache/"+filename)
+       
+    except:
+        return "Image not found"
+    img = img.get_fdata()
+    print(type(img))
+    matrix_3d = intensity_rescaling(img)
+    
+    save_nii(matrix_3d, "./cache/intensity-rescaling-res.nii")
+    
+    # Retorna la imagen como respuesta al GET  
+    return jsonify({"msg":"Intensity rescaling"})
+
+
 @app.route('/')
 def page():
     return render_template( 'index.html')

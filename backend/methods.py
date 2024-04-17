@@ -1,7 +1,7 @@
 
 
 import numpy as np
-
+import nibabel as nib
 
 def isodata(img):
     tau_t = 100
@@ -217,6 +217,23 @@ def z_score_transform(img:np.ndarray):
   
 
   return new_img
+
+def intensity_rescaling(img:np.ndarray):
+  values = img[img>0].flatten()
+  min_intensity = np.min(values)
+  max_intensity = np.max(values)
+
+  matrix_min = np.full(img.shape, min_intensity)
+  matrix_max = np.full(img.shape, max_intensity)
+
+  new_img = (img - matrix_min)/ (matrix_max - matrix_min)
+  return new_img
+
+
+def save_nii(img:np.ndarray, filename:str):
+  new_nii = nib.Nifti1Image(img, affine=None)
+  nib.save(new_nii, filename)
+  return True
 
 def scale_matrix(matrix):
     scaled_matrix = (matrix - matrix.min()) * (255 / (matrix.max() - matrix.min()))

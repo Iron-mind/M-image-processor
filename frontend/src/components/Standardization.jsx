@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Navbar from './Navbar';
 import { Link } from 'react-router-dom';
 import { ZScore } from './ZScore';
+import { IntensityRescaling } from './IntensityRescaling';
 
 const Standardization = () => {
     const [sliderValuex, setSliderValuex] = useState(100); // Valor inicial del slider
@@ -18,7 +19,7 @@ const Standardization = () => {
     const [input, setInput] = useState({
       tau: 0,
       zScore: false,
-      IntensityRescaling: false,
+      intensityRescaling: false,
       whiteStripe: false,
         histogramMatching: false,
     }); // Estado para almacenar el valor del input
@@ -53,6 +54,17 @@ const Standardization = () => {
                 alert("Z-Score transformation applied");
                 setInput({ ...input, zScore: true });
             })
+            .catch((error) => console.error(error));
+    };
+
+    const applyIRescaling = () => {
+        fetch(`http://localhost:8000/image/intensity-rescaling/${imageName}`)
+            .then((response) => response.json())
+            .then((data) => {
+                alert("Intensity rescaling applied");
+                setInput({ ...input, intensityRescaling: true });
+            }
+            )
             .catch((error) => console.error(error));
     };
   
@@ -108,7 +120,8 @@ const Standardization = () => {
 				<div className='flex flex-row'>
                     <div className='flex flex-col w-[300px]'>
                         <button
-                        className='mx-4 my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
+                            onClick={applyIRescaling}
+                            className='mx-4 my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
                             Intensity rescaling
                         </button>
                     </div>
@@ -134,8 +147,12 @@ const Standardization = () => {
                     
                 </div>
                 <div className='flex flex-row'>
+                        {input.intensityRescaling && <IntensityRescaling/>}
+                </div>
+                <div className='flex flex-row'>
                         {input.zScore && <ZScore />}
                 </div>
+                
 			</div>
 		);
   };
