@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { ZScore } from './ZScore';
 import { IntensityRescaling } from './IntensityRescaling';
 import { HistogramMatching } from './HistogramMatching';
+import { WhiteStripe } from './WhiteStripe';
 
 const Standardization = () => {
     const [sliderValuex, setSliderValuex] = useState(100); // Valor inicial del slider
@@ -75,6 +76,15 @@ const Standardization = () => {
             .then((data) => {
                 alert("Histogram Matching applied");
                 setInput({ ...input, histogramMatching: true });
+            })
+            .catch((error) => console.error(error));
+    }
+    let applyWhiteStripe    = () => {
+        fetch(`http://localhost:8000/image/white-stripe/${imageName}`)
+            .then((response) => response.json())
+            .then((data) => {
+                alert("White Stripe applied");
+                setInput({ ...input, whiteStripe: true });
             })
             .catch((error) => console.error(error));
     }
@@ -152,6 +162,7 @@ const Standardization = () => {
                     </div>
                     <div className='flex flex-col w-[300px]'>
                         <button
+                            onClick={applyWhiteStripe}
                             className='mx-4 my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
                             White Stripe
                         </button>
@@ -166,6 +177,9 @@ const Standardization = () => {
                 </div>
                 <div className='flex flex-row'>
                         {input.histogramMatching && <HistogramMatching/>}
+                </div>
+                <div className='flex flex-row'>
+                        {input.whiteStripe && <WhiteStripe/>}
                 </div>
                 
 			</div>

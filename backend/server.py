@@ -7,7 +7,7 @@ import nibabel as nib
 import numpy as np
 import os
 from flask_cors import CORS
-from methods import histogram_matching, intensity_rescaling, isodata, k_means, region_growing, region_growing_3d, save_nii, scale_matrix, z_score_transform
+from methods import histogram_matching, intensity_rescaling, isodata, k_means, region_growing, region_growing_3d, save_nii, scale_matrix, white_stripe, z_score_transform
 
 app = Flask(__name__, static_folder='dist/assets', template_folder='dist')
 
@@ -250,7 +250,9 @@ def get_histogram(filename):
     max_t = img.max()
    
     plt.xlim(min_t, max_t)
-    new_img_f =img[img>min_t].flatten() 
+    rang = max_t - min_t
+    tol = rang/10
+    new_img_f =img[img>(min_t +tol)].flatten() 
     # Convierte la matriz a una imagen WebP
 
     plt.hist(new_img_f, 100)
@@ -290,6 +292,20 @@ def apply_histogram_matching(filename):
     save_nii(matrix_3d, "./cache/histogram-matching-res.nii")
       
     return jsonify({"msg":"Histogram matching"})
+
+@app.route('/image/white-stripe/<filename>')
+def apply_white_stripe(filename):
+    try:
+        img = nib.load("./cache/"+filename)
+        
+    except:
+        return "Image not found"
+    img = img.get_fdata()
+    
+    new_img = white_stripe(img)
+    save_nii(new_img, "./cache/white-stripe-res.nii")
+    return jsonify({"msg":"White stripe"})
+
 
 @app.route('/')
 def page():

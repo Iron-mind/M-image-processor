@@ -307,7 +307,7 @@ aux_test = np.array([[10,30,40],[20,30,40],[30,40,50]])
 # plt.hist(ni[ni>0].flatten(), bins=100)
 
 
-def white_stripe_standardization(matrix):
+def white_stripe(matrix):
     bins, counts, patches = plt.hist(matrix[matrix>50].flatten(),200)
     bins_r = list(reversed(bins))
     counts_r = list(reversed(counts))
