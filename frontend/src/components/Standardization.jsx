@@ -1,8 +1,7 @@
-import React from 'react';
-import ImageViewer from './ImageViewer';
+
 import { useState } from 'react';
 import Navbar from './Navbar';
-import { Link } from 'react-router-dom';
+
 import { ZScore } from './ZScore';
 import { IntensityRescaling } from './IntensityRescaling';
 import { HistogramMatching } from './HistogramMatching';
@@ -16,8 +15,7 @@ const Standardization = () => {
       cenital: `http://localhost:8000/image/${imageName}?x=100`,
       sagital: `http://localhost:8000/image/${imageName}?y=100`
     });
-    const [loadingTau, setLoadingTau] = useState(false);
-  
+
     const [input, setInput] = useState({
       tau: 0,
       zScore: false,
@@ -52,7 +50,7 @@ const Standardization = () => {
     const applyZScore = () => {
         fetch(`http://localhost:8000/image/z-score/${imageName}`)
             .then((response) => response.json())
-            .then((data) => {
+            .then(() => {
                 alert("Z-Score transformation applied");
                 setInput({ ...input, zScore: true });
             })
@@ -62,7 +60,7 @@ const Standardization = () => {
     const applyIRescaling = () => {
         fetch(`http://localhost:8000/image/intensity-rescaling/${imageName}`)
             .then((response) => response.json())
-            .then((data) => {
+            .then(() => {
                 alert("Intensity rescaling applied");
                 setInput({ ...input, intensityRescaling: true });
             }
@@ -73,7 +71,7 @@ const Standardization = () => {
     let applyHistogramMatching = () => {
         fetch(`http://localhost:8000/image/histogram-matching/${imageName}`)
             .then((response) => response.json())
-            .then((data) => {
+            .then(() => {
                 alert("Histogram Matching applied");
                 setInput({ ...input, histogramMatching: true });
             })
@@ -82,7 +80,7 @@ const Standardization = () => {
     let applyWhiteStripe    = () => {
         fetch(`http://localhost:8000/image/white-stripe/${imageName}`)
             .then((response) => response.json())
-            .then((data) => {
+            .then(() => {
                 alert("White Stripe applied");
                 setInput({ ...input, whiteStripe: true });
             })

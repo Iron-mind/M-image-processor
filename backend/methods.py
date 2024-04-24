@@ -210,17 +210,23 @@ def region_growing_3d(img, startI, coordinates, axis):
   return annotation_img
 
 def z_score_transform(img:np.ndarray):
-  clean_img = img[img>0]
+  min_t = img.min() #minimo trasformado (suele ser el cero el minimo)
+  max_t = img.max()
+  rang = abs(max_t - min_t)
+    
+    
+  tol = rang/20
+  clean_img = img[img>(min_t + tol)]
   
   mean_intensity = clean_img.mean()
   std_intensity = clean_img.std()
-
+  print("mean_intensity", mean_intensity)
   mean_matrix = np.full(img.shape, mean_intensity)
  
 
-  new_img = (img - mean_matrix)/ std_intensity
+  new_img = (img - mean_matrix) * (1/ std_intensity)
   
-
+  
   return new_img
 
 def intensity_rescaling(img:np.ndarray):
@@ -240,65 +246,65 @@ def save_nii(img:np.ndarray, filename:str):
   nib.save(new_nii, filename)
   return True
 
-def histogram_matching(input_img:np.ndarray, test_img:np.ndarray):
+# def histogram_matching(input_img:np.ndarray, test_img:np.ndarray):
    
-   fs = h_training(input_img, 5)
-   x = np.linspace(5,100,5)
-   tes = h_testing(test_img, fs, x)
-   return tes
+#    fs = h_training(input_img, 5)
+#    x = np.linspace(5,100,5)
+#    tes = h_testing(test_img, fs, x)
+#    return tes
  
-def h_training(img:np.ndarray, k_pers):
+# def h_training(img:np.ndarray, k_pers):
 
-  x = np.linspace(5,100,k_pers)
-  y = np.percentile(img.flatten(),x)
+#   x = np.linspace(5,100,k_pers)
+#   y = np.percentile(img.flatten(),x)
 
-  m = (y[1]-y[0])/(x[1]-x[0])
-  b = y[0] - m*x[0]
+#   m = (y[1]-y[0])/(x[1]-x[0])
+#   b = y[0] - m*x[0]
 
-  fx1 = lambda x: m*x + b
+#   fx1 = lambda x: m*x + b
   
-  m2 = (y[2]-y[1])/(x[2]-x[1])
-  b2 = y[1] - m2*x[1]
-  fx2 = lambda x: m2*x + b2
+#   m2 = (y[2]-y[1])/(x[2]-x[1])
+#   b2 = y[1] - m2*x[1]
+#   fx2 = lambda x: m2*x + b2
 
-  m3 = (y[3]-y[2])/(x[3]-x[2])
-  b3 = y[2] - m3*x[2]
-  fx3 = lambda x: m3*x + b3
+#   m3 = (y[3]-y[2])/(x[3]-x[2])
+#   b3 = y[2] - m3*x[2]
+#   fx3 = lambda x: m3*x + b3
 
-  m4 = (y[4]-y[3])/(x[4]-x[3])
-  b4 = y[3] - m4*x[3]
-  fx4 = lambda x: m4*x + b4
+#   m4 = (y[4]-y[3])/(x[4]-x[3])
+#   b4 = y[3] - m4*x[3]
+#   fx4 = lambda x: m4*x + b4
 
-  print("x: ",x)
+#   print("x: ",x)
   
-  return [ fx1,fx2,fx3,fx4]
+#   return [ fx1,fx2,fx3,fx4]
 
-def h_testing(img:np.ndarray, functions, landmarks):
-  print(img.flatten().shape)
-  img_f =img.flatten() 
-  img_f_sorted = np.sort(img_f)
-  img_f_set = list(set(img_f_sorted ))
-  percentiles = sp.percentileofscore(img_f_set, img[:,:,120])
-  print(percentiles.shape, img.shape)
-  new_img = np.zeros(img[:,:,120].shape)
+# def h_testing(img:np.ndarray, functions, landmarks):
+#   print(img.flatten().shape)
+#   img_f =img.flatten() 
+#   img_f_sorted = np.sort(img_f)
+#   img_f_set = list(set(img_f_sorted ))
+#   percentiles = sp.percentileofscore(img_f_set, img[:,:,120])
+#   print(percentiles.shape, img.shape)
+#   new_img = np.zeros(img[:,:,120].shape)
 
-  # new_img[percentiles > landmarks[0] and percentiles < landmarks[1]] = functions[0](percentiles[percentiles > landmarks[0] and percentiles < landmarks[1]])
-  for i in range(len(functions)):
-    if (percentiles > landmarks[i]).any() and (percentiles < landmarks[i+1]).any():
-        matching_indices = (percentiles > landmarks[i]) & (percentiles < landmarks[i+1])  # Efficient element-wise comparison
-        new_img[matching_indices] = functions[i](percentiles[matching_indices])
+#   # new_img[percentiles > landmarks[0] and percentiles < landmarks[1]] = functions[0](percentiles[percentiles > landmarks[0] and percentiles < landmarks[1]])
+#   for i in range(len(functions)):
+#     if (percentiles > landmarks[i]).any() and (percentiles < landmarks[i+1]).any():
+#         matching_indices = (percentiles > landmarks[i]) & (percentiles < landmarks[i+1])  # Efficient element-wise comparison
+#         new_img[matching_indices] = functions[i](percentiles[matching_indices])
   
-  return new_img
+#   return new_img
   
 
-aux_img = nib.load("./cache/sub-p8-T1w.nii.gz")
-aux_img = aux_img.get_fdata()
+# aux_img = nib.load("./cache/sub-p8-T1w.nii.gz")
+# aux_img = aux_img.get_fdata()
 
-input_img = nib.load("./cache/sub-01_T1w.nii")
-input_img = input_img.get_fdata()
+# input_img = nib.load("./cache/sub-01_T1w.nii")
+# input_img = input_img.get_fdata()
 
-aux = np.array([[1,3,4],[2,3,4],[3,4,5]])
-aux_test = np.array([[10,30,40],[20,30,40],[30,40,50]])
+# aux = np.array([[1,3,4],[2,3,4],[3,4,5]])
+# aux_test = np.array([[10,30,40],[20,30,40],[30,40,50]])
 
 # print(aux_img.shape, input_img.shape)
 # ni = histogram_matching(input_img=input_img, test_img=aux_img)
@@ -306,6 +312,58 @@ aux_test = np.array([[10,30,40],[20,30,40],[30,40,50]])
 # print(ni)
 # plt.hist(ni[ni>0].flatten(), bins=100)
 
+def transform(value, functions, doms ):
+
+  for i in range(len(functions)-1):
+    if( value >= doms[i][0] and value <  doms[i+1][0]):
+      print(value, functions[i](value))
+      return functions[i](value)
+    elif value >= doms[i][0]:
+      return functions[i](value)
+  return doms[0][0]
+
+
+
+# print(x,y, y_intensity,len(funcs))
+# print( len(doms))
+
+def histogram_matching(input_img:np.ndarray, test_img:np.ndarray):
+  #input_img is a reference image
+
+   fs,doms = h_training(input_img,test_img, 5)
+   x = np.linspace(5,100,5)
+   tes = h_testing(test_img, fs, doms)
+   return tes
+
+def h_training(img:np.ndarray,img_t, k_pers):
+
+  x = np.linspace(5,95,k_pers)
+  y = np.percentile(img.flatten(),x) ## y training
+
+  img_testing = img_t #np.random.randint(1, 9, size=(8, 8))*10#np.array([[10,30,20],[20,30,20],[30,20,20]]) # img to tranform
+  y_intensity = np.percentile(img_testing.flatten(),x)
+
+  funcs = []
+  as_intensity = []
+  doms = []
+  for i in range(len(x)-1):
+    m = int(y[i+1]-y[i])/(x[i+1]-x[i])
+    b = y[i] - m*x[i]
+    fx1 = lambda x: m*x + int(b)
+    funcs.append(fx1)
+    doms.append([y_intensity[i], y_intensity[i+1]])
+
+  return (funcs, doms)
+
+def h_testing(img:np.ndarray, funcs, doms):
+   new_img = np.zeros(img.shape)
+   for i in range(img.shape[0]):
+    for j in range(img.shape[1]):
+      for k in range(img.shape[2]):
+      # Acceder y procesar el elemento en la posición (i, j, k)
+        new_img[i, j, k] = transform(img[i, j, k], funcs, doms)
+
+   return new_img
 
 def white_stripe(matrix):
     bins, counts, patches = plt.hist(matrix[matrix>50].flatten(),200)

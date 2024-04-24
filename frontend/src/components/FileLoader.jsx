@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import Navbar from './Navbar';
-import { Link } from 'react-router-dom';
-
+import {  useNavigate } from 'react-router-dom';
 const ImageLoader = () => {
+   const navigate = useNavigate()
   const [image, setImage] = useState(null);
   const [uploading, setUploading] = useState(false);
   const handleImageChange = (event) => {
@@ -29,12 +29,13 @@ const ImageLoader = () => {
 		body: formdata,
 	};
 
-	fetch("http://192.168.100.7:8000/image/upload", requestOptions)
+	fetch("http://localhost:8000/image/upload", requestOptions)
 		.then((response) =>{
 			setUploading(false);
 			
 			localStorage.setItem("image", image.name);
 			setImage(null);
+			navigate("/view")
 		})
 		.catch((error) => console.error(error));
 	};
@@ -85,7 +86,7 @@ const ImageLoader = () => {
 
 			{image && (
 				<div className="mb-4 text-black">
-					{image.name} - {(image.size / 1000000).toFixed(2)} MB
+					{image.name} - {(image.size / 1048576).toFixed(2)} MB
 				</div>
 			)}
 			{image && (
@@ -93,14 +94,14 @@ const ImageLoader = () => {
 					{uploading ? (
 						<div>loading</div>
 					) : (
-						<Link to="/view">
+						
 						<button
 							onClick={handleSubmit}
 							className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
 						>
 							Inspect
 						</button>
-						</Link>
+						
 					)}
 				</div>
 			)}

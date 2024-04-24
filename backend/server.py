@@ -3,6 +3,8 @@ from flask import Flask, jsonify, render_template, request, send_file, send_from
 import imageio
 
 from matplotlib import pyplot as plt
+import matplotlib
+matplotlib.use('Agg')
 import nibabel as nib
 import numpy as np
 import os
@@ -228,6 +230,7 @@ def apply_z_score(filename):
     img = img.get_fdata()
     print(type(img))
     matrix_3d = z_score_transform(img)
+    
     save_nii(matrix_3d, "./cache/z-score-res.nii")
     # new_nii = nib.Nifti1Image(matrix_3d, affine=None)
     # nib.save(new_nii, "./cache/z-score-res.nii")
@@ -248,13 +251,14 @@ def get_histogram(filename):
     # Selecciona la matriz deseada
     min_t = img.min() #minimo trasformado (suele ser el cero el minimo)
     max_t = img.max()
-   
-    plt.xlim(min_t, max_t)
-    rang = max_t - min_t
-    tol = rang/10
+    rang = abs(max_t - min_t)
+    
+    
+    tol = rang/20
     new_img_f =img[img>(min_t +tol)].flatten() 
     # Convierte la matriz a una imagen WebP
-
+    plt.clf()
+    plt.xlim(min_t,max_t)
     plt.hist(new_img_f, 100)
     fname = str(np.random.randint(0,20))+"hist.jpg"
     plt.savefig('./cache/'+fname)
@@ -283,12 +287,12 @@ def apply_intensity_rescaling(filename):
 def apply_histogram_matching(filename):
     try:
         img = nib.load("./cache/"+filename)
-        
+        reference_img = nib.load("./cache/sub-p8-T1w.nii.gz")
     except:
         return "Image not found"
     img = img.get_fdata()
-    
-    matrix_3d = histogram_matching(img)
+    reference_img = reference_img.get_fdata()
+    matrix_3d = histogram_matching(reference_img,img)
     save_nii(matrix_3d, "./cache/histogram-matching-res.nii")
       
     return jsonify({"msg":"Histogram matching"})
