@@ -287,7 +287,8 @@ def apply_intensity_rescaling(filename):
 def apply_histogram_matching(filename):
     try:
         img = nib.load("./cache/"+filename)
-        reference_img = nib.load("./cache/sub-p8-T1w.nii.gz")
+        ref_name = request.args.get("ref")
+        reference_img = nib.load("./cache/"+ref_name)
     except:
         return "Image not found"
     img = img.get_fdata()

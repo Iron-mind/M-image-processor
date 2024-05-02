@@ -96,7 +96,7 @@ const ImageViewer = () => {
 			<div className="flex flex-row">
 				<div className="flex flex-col w-[300px]">
 					<div className="my-2">
-						<label htmlFor="tau" className="text-black mx-3">
+						<label htmlhtmlFor="tau" className="text-black mx-3">
 							Tau value
 						</label>
 						<input
@@ -133,7 +133,7 @@ const ImageViewer = () => {
 				</div>
 				<div className="flex flex-col w-[300px]">
 					<div className="my-2">
-						<label htmlFor="stringkValues" className="text-black mx-3">
+						<label htmlhtmlFor="stringkValues" className="text-black mx-3">
 							Initial k values
 						</label>
 						<input

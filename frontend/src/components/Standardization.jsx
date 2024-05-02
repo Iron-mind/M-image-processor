@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import Navbar from './Navbar';
-
+import { useNavigate } from 'react-router-dom';
 import { ZScore } from './ZScore';
 import { IntensityRescaling } from './IntensityRescaling';
 import { HistogramMatching } from './HistogramMatching';
@@ -11,10 +11,13 @@ const Standardization = () => {
     const [sliderValuex, setSliderValuex] = useState(100); // Valor inicial del slider
     const [sliderValuey, setSliderValuey] = useState(100); // Valor inicial del slider
     const [imageName, setImageName] = useState(localStorage.getItem('image')); // Estado para almacenar el nombre de la imagen
+    const [referenceImage, setImage] = useState(null);
+    const [loadingHM, setLoadingHM] = useState(false);
     const [images, setImages] = useState({
       cenital: `http://localhost:8000/image/${imageName}?x=100`,
       sagital: `http://localhost:8000/image/${imageName}?y=100`
     });
+    const navigate = useNavigate();
 
     const [input, setInput] = useState({
       tau: 0,
@@ -68,14 +71,18 @@ const Standardization = () => {
             .catch((error) => console.error(error));
     };
 
-    let applyHistogramMatching = () => {
-        fetch(`http://localhost:8000/image/histogram-matching/${imageName}`)
+    let applyHistogramMatching = async () => {
+        await handleSubmit();
+        setLoadingHM(true);
+        fetch(`http://localhost:8000/image/histogram-matching/${imageName}?ref=${referenceImage.name}`)
             .then((response) => response.json())
             .then(() => {
+
                 alert("Histogram Matching applied");
                 setInput({ ...input, histogramMatching: true });
             })
-            .catch((error) => console.error(error));
+            .catch((error) => console.error(error))
+            .finally(() => setLoadingHM(false));
     }
     let applyWhiteStripe    = () => {
         fetch(`http://localhost:8000/image/white-stripe/${imageName}`)
@@ -86,7 +93,39 @@ const Standardization = () => {
             })
             .catch((error) => console.error(error));
     }
-  
+    const handleImageChange = () => {
+        const file = document.getElementById("dropzone-file").files[0];
+        const reader = new FileReader();
+
+        reader.onloadend = () => {
+            setImage(file);
+        };
+
+        if (file) {
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleSubmit = async () => {
+
+        //enviar al server
+        const formdata = new FormData();
+        formdata.append("file", referenceImage, referenceImage.name);
+
+        const requestOptions = {
+            method: "POST",
+            body: formdata,
+        };
+        await fetch("http://localhost:8000/image/upload", requestOptions)
+            .then(() => {
+
+                localStorage.setItem("referenceImage", referenceImage.name);
+                setImage(null);
+
+            })
+            .catch((error) => console.error(error));
+
+    }
     return (
 			<div className="flex flex-col items-center justify-center mt-9">
 				<Navbar />
@@ -152,11 +191,45 @@ const Standardization = () => {
                         </button>
                     </div>
                     <div className='flex flex-col w-[300px]'>
+                    <label
+                        htmlFor="dropzone-file"
+                        className="flex flex-col items-center justify-center w-full h-20 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
+                    >
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                            <svg
+                                className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400"
+                                aria-hidden="true"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 20 16"
+                            >
+                                <path
+                                    stroke="currentColor"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+                                />
+                            </svg>
+
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                Medical image (.nii)
+                            </p>
+                        </div>
+                        <input
+                            id="dropzone-file"
+                            type="file"
+                            accept="*"
+                            onChange={handleImageChange}
+                            className="hidden"
+                        />
+                    </label>
                         <button
                         onClick={applyHistogramMatching}
                         className='mx-4 my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
                             Histogram Matching
                         </button>
+
                     </div>
                     <div className='flex flex-col w-[300px]'>
                         <button
@@ -174,6 +247,7 @@ const Standardization = () => {
                         {input.zScore && <ZScore />}
                 </div>
                 <div className='flex flex-row'>
+                {loadingHM && <span className='text-black'>Calculating... <i>This may take time</i></span>}
                         {input.histogramMatching && <HistogramMatching/>}
                 </div>
                 <div className='flex flex-row'>

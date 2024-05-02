@@ -33,12 +33,12 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 	<React.StrictMode>
 		<RouterProvider router={router} />
 
-		<div class="sticky bottom-1 left-0 right-0 flex justify-center items-center">
+    <div className="sticky bottom-1 left-0 right-0 flex justify-center items-center">
 			<p className="read-the-docs block">
 				Developed by Juan David Tovar (iron-mind)
 			</p>
 
-			<a href="https://github.com/iron-mind" class="text-[#0075FF]">
+      <a href="https://github.com/iron-mind" className="text-[#0075FF]">
 				- Github
 			</a>
 		</div>
