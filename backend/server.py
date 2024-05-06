@@ -9,7 +9,7 @@ import nibabel as nib
 import numpy as np
 import os
 from flask_cors import CORS
-from methods import histogram_matching, intensity_rescaling, isodata, k_means, region_growing, region_growing_3d, save_nii, scale_matrix, white_stripe, z_score_transform
+from methods import denoising_filter, histogram_matching, intensity_rescaling, isodata, k_means, region_growing, region_growing_3d, save_nii, scale_matrix, white_stripe, z_score_transform
 
 app = Flask(__name__, static_folder='dist/assets', template_folder='dist')
 
@@ -311,6 +311,26 @@ def apply_white_stripe(filename):
     save_nii(new_img, "./cache/white-stripe-res.nii")
     return jsonify({"msg":"White stripe"})
 
+#denoising
+@app.route('/image/denoising/<filename>')
+def apply_denoising(filename):
+    try:
+        img = nib.load("./cache/"+filename)
+        nb_len = request.args.get("nb_len")
+        filter_type = request.args.get("filter")
+        
+    except:
+        return "Image not found"
+    img = img.get_fdata()
+    nb_len = int(nb_len)
+    if filter_type == "median":
+        new_img = denoising_filter(img,nb_len,np.median)
+    
+    else:
+        new_img = denoising_filter(img,nb_len,np.mean)
+
+    save_nii(new_img, "./cache/denoising-res.nii")
+    return jsonify({"msg":"Denoising"})
 
 @app.route('/')
 def page():

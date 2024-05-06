@@ -1,11 +1,11 @@
 
 import { useState } from 'react';
 import Navbar from './Navbar';
-import { useNavigate } from 'react-router-dom';
 import { ZScore } from './ZScore';
 import { IntensityRescaling } from './IntensityRescaling';
 import { HistogramMatching } from './HistogramMatching';
 import { WhiteStripe } from './WhiteStripe';
+import { Denoising } from './Denoising';
 
 const Standardization = () => {
     const [sliderValuex, setSliderValuex] = useState(100); // Valor inicial del slider
@@ -17,14 +17,15 @@ const Standardization = () => {
       cenital: `http://localhost:8000/image/${imageName}?x=100`,
       sagital: `http://localhost:8000/image/${imageName}?y=100`
     });
-    const navigate = useNavigate();
-
+    const [loadingDen, setLoadingDen] = useState(false);
     const [input, setInput] = useState({
       tau: 0,
       zScore: false,
       intensityRescaling: false,
       whiteStripe: false,
         histogramMatching: false,
+        denoising: false,
+        nb_len: 1
     }); // Estado para almacenar el valor del input
     // Función para manejar el cambio en el slider
     const handleSliderChangex = (event) => {
@@ -93,6 +94,17 @@ const Standardization = () => {
             })
             .catch((error) => console.error(error));
     }
+
+    const applyDenoising = (filter) => {
+        setLoadingDen(true);
+        fetch(`http://localhost:8000/image/denoising/${imageName}?filter=${filter}&nb_len=${input.nb_len}`)
+            .then((response) => response.json())
+            .then(() => {
+                alert("Denoising applied");
+                setInput({ ...input, denoising: true });
+            })
+            .catch((error) => console.error(error)).finally(() => setLoadingDen(false));
+    };
     const handleImageChange = () => {
         const file = document.getElementById("dropzone-file").files[0];
         const reader = new FileReader();
@@ -129,7 +141,7 @@ const Standardization = () => {
     return (
 			<div className="flex flex-col items-center justify-center mt-9">
 				<Navbar />
-				<h1 className="text-lg font-bold text-black m-4">Standardization</h1>
+            <h1 className="text-lg font-bold text-black m-4">Filter and Standardization</h1>
 				<div className="flex justify-center mb-4">
 					<div className="mr-4">
 						{images.cenital && (
@@ -176,8 +188,26 @@ const Standardization = () => {
 					<span className="text-black">{sliderValuey}</span>
 				</div>
 				<div className='flex flex-row'>
-                    <div className='flex flex-col w-[300px]'>
-                        <button
+                <div className='flex flex-col w-[300px]'>
+                    <button
+                        onClick={() => applyDenoising("mean")}
+                        className='mx-4 my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
+                        Mean Filter
+                    </button>
+                    <button
+                        onClick={() => applyDenoising("median")}
+                        className='mx-4 my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
+                        Median Filter
+                    </button>
+                    {/* neighborhood len */}
+                    <label htmlFor="nb_len" className='text-black' value={input.nb_len}>Vicinity length</label>
+                    <input type="number" name="nb_len" className="w-[100px] text-black mx-auto" onChange={(e) => { setInput({ ...input, nb_len: e.target.value }) }} />
+
+                    {loadingDen && <span className='text-black'>Calculating...</span>}
+
+                </div>
+                <div className='flex flex-col w-[300px]'>
+                    <button
                             onClick={applyIRescaling}
                             className='mx-4 my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
                             Intensity rescaling
@@ -239,7 +269,17 @@ const Standardization = () => {
                         </button>
                     </div>
                     
-                </div>
+            </div>
+            <div className='flex flex-row'>
+                {
+                    !loadingDen &&
+                    <>
+                        {input.denoising &&
+                            <Denoising />
+                        }
+                    </>
+                }
+            </div>
                 <div className='flex flex-row'>
                         {input.intensityRescaling && <IntensityRescaling/>}
                 </div>

@@ -323,26 +323,29 @@ def white_stripe(matrix):
     new_img = matrix / ws
     return new_img
 
+def denoising_filter(img:np.ndarray, vicinity_len=1, fn=np.mean):
+  # all values in vecinity
 
-# aux_img = nib.load("./cache/sub-p8-T1w.nii.gz")
-# aux_img = aux_img.get_fdata()
+   current_vicinity = []
+   new_img = np.zeros(img.shape)
+   for i in range(img.shape[0]):
 
-# input_img = nib.load("./cache/sub-01_T1w.nii")
-# input_img = input_img.get_fdata()
+      for j in range(img.shape[1]):
+        for k in range(img.shape[2]):
 
-# shape_aux = (3,3,3)
-# aux = np.random.randint(1, 21,shape_aux )
-# aux_test = aux*10
+          if img[i,j,k] > 0 :
 
-# # print(aux_img.shape, input_img.shape)
-# ni = histogram_matching(input_img=aux, test_img=aux_test)
-# print(aux)
-# print(ni)
+            for x in range(i-vicinity_len, i+vicinity_len+1):
+              for y in range(j-vicinity_len, j+vicinity_len+1):
+                # for z in range(k-vicinity_len, k+vicinity_len+1):
+                  if x >= 0 and y >= 0  and x < img.shape[0] and y < img.shape[1] :#and z < img.shape[2]
+                    current_vicinity.append(img[x,y,k])
 
-# for i in range(ni.shape[0]):
-#     for j in range(ni.shape[1]):
-#       for k in range(ni.shape[2]):
-#         print(ni[i,j,k],aux[i,j,k])
-# print(ni.min(), ni.max())
-# print(ni)
-# plt.hist(ni[ni>0].flatten(), bins=100)
+
+            new_img[i, j, k] = fn(current_vicinity)
+          else:
+            new_img[i, j, k] = img[i,j,k]
+
+          current_vicinity = []
+   return new_img
+
