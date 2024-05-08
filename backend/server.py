@@ -372,8 +372,7 @@ def apply_registration(filename):
         # reference_img = nib.load("./cache/"+ref_name)
     except:
         return "Image not found"
-    # img = img.get_fdata()
-    # reference_img = reference_img.get_fdata()}
+   
     try:
         matrix_3d = registration_itk("./cache/"+ref_name,"./cache/"+filename)
     
