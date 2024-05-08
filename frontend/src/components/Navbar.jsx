@@ -24,13 +24,18 @@ const Navbar = () => {
 										to="/processor"
 										className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
 									>
-										Processor
+										Region Growing
 									</Link>
 									<Link
 										to="/standardizations"
 										className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
 									>
 										Filter and Standardizations
+									</Link>
+									<Link
+										to="/edges"
+										className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+									>Registration
 									</Link>
 								</div>
 							</div>

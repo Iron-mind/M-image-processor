@@ -395,7 +395,6 @@ def registration_itk(fixed_img_p, moving_img_p):
     sitk.CenteredTransformInitializerFilter.GEOMETRY,
     )
   registration_method = sitk.ImageRegistrationMethod()
-  registration_method = sitk.ImageRegistrationMethod()
 
   # Similarity metric settings.
   registration_method.SetMetricAsMattesMutualInformation(numberOfHistogramBins=50)
@@ -413,8 +412,23 @@ def registration_itk(fixed_img_p, moving_img_p):
   )
   registration_method.SetOptimizerScalesFromPhysicalShift()
 
+  # Setup for the multi-resolution framework.
+  # registration_method.SetShrinkFactorsPerLevel(shrinkFactors = [4,2,1])
+  # registration_method.SetSmoothingSigmasPerLevel(smoothingSigmas=[2,1,0])
+  # registration_method.SmoothingSigmasAreSpecifiedInPhysicalUnitsOn()
+
+  # Don't optimize in-place, we would possibly like to run this cell multiple times.
   registration_method.SetInitialTransform(initial_transform, inPlace=False)
 
+  # Connect all of the observers so that we can perform plotting during registration.
+  # registration_method.AddCommand(sitk.sitkStartEvent, rgui.start_plot)
+  # registration_method.AddCommand(sitk.sitkEndEvent, rgui.end_plot)
+  # registration_method.AddCommand(
+  #     sitk.sitkMultiResolutionIterationEvent, rgui.update_multires_iterations
+  # )
+  # registration_method.AddCommand(
+  #     sitk.sitkIterationEvent, lambda: rgui.plot_values(registration_method)
+  # )
 
   final_transform = registration_method.Execute(fixed_image, moving_image)
 
@@ -432,11 +446,11 @@ def registration_itk(fixed_img_p, moving_img_p):
     sitk.sitkLinear,
     0.0,
     moving_image.GetPixelID(),
-)
+  )
   sitk.WriteImage(
-      moving_resampled, os.path.join("/cache", "registration-res.nii")
+      moving_resampled, "/home/iron-mind/Desktop/reps/M-image-processor/backend/cache/"+ "registration-res.nii"
   )
-  sitk.WriteTransform(
-      final_transform, os.path.join("/cache", "registration-res.tfm")
-  )
+  # sitk.WriteTransform(
+  #     final_transform, os.path.join("/cache", "registration-res.tfm")
+  # )
   return True

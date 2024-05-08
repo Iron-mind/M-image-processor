@@ -3,7 +3,7 @@ import './App.css'
 import ImageLoader from './components/FileLoader'
 
 function App() {
-  const [count, setCount] = useState(0)
+
 
   return (
     <>

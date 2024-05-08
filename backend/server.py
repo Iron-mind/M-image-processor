@@ -9,7 +9,7 @@ import nibabel as nib
 import numpy as np
 import os
 from flask_cors import CORS
-from methods import denoising_filter, edges_by_2derivatives, edges_by_derivatives, edges_by_meandiff, histogram_matching, intensity_rescaling, isodata, k_means, region_growing, region_growing_3d, save_nii, scale_matrix, white_stripe, z_score_transform
+from methods import denoising_filter, edges_by_2derivatives, edges_by_derivatives, edges_by_meandiff, histogram_matching, intensity_rescaling, isodata, k_means, region_growing, region_growing_3d, registration_itk, save_nii, scale_matrix, white_stripe, z_score_transform
 
 app = Flask(__name__, static_folder='dist/assets', template_folder='dist')
 
@@ -363,6 +363,24 @@ def apply_edges(filename):
     with open(os.path.join("cache", output_filename), "wb") as f:
         f.write(imagen_webp)
     return send_file("cache/draft.webp", mimetype="image/webp")
+
+@app.route('/image/registration/<filename>')
+def apply_registration(filename):
+    try:
+        # img = nib.load("./cache/"+filename)
+        ref_name = request.args.get("ref")
+        # reference_img = nib.load("./cache/"+ref_name)
+    except:
+        return "Image not found"
+    # img = img.get_fdata()
+    # reference_img = reference_img.get_fdata()}
+    try:
+        matrix_3d = registration_itk("./cache/"+ref_name,"./cache/"+filename)
+    
+    except:
+        return "Error in registration"
+    
+    return jsonify({"msg":"Registration"})
 
 @app.route('/')
 def page():
