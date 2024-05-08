@@ -4,3 +4,4 @@ nibabel
 matplotlib
 numpy
 flask-cors
+SimpleITK

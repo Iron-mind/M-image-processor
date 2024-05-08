@@ -9,7 +9,7 @@ import nibabel as nib
 import numpy as np
 import os
 from flask_cors import CORS
-from methods import denoising_filter, histogram_matching, intensity_rescaling, isodata, k_means, region_growing, region_growing_3d, save_nii, scale_matrix, white_stripe, z_score_transform
+from methods import denoising_filter, edges_by_2derivatives, edges_by_derivatives, edges_by_meandiff, histogram_matching, intensity_rescaling, isodata, k_means, region_growing, region_growing_3d, save_nii, scale_matrix, white_stripe, z_score_transform
 
 app = Flask(__name__, static_folder='dist/assets', template_folder='dist')
 
@@ -331,6 +331,38 @@ def apply_denoising(filename):
 
     save_nii(new_img, "./cache/denoising-res.nii")
     return jsonify({"msg":"Denoising"})
+
+
+@app.route('/image/edges/<filename>')
+def apply_edges(filename):
+    try:
+        img = nib.load("./cache/"+filename)
+        x = request.args.get("x")
+        y = request.args.get("y")
+        f_type = request.args.get("type")
+    except:
+        return "Image not found"
+    img = img.get_fdata()
+    if y is not None:
+        matriz = img[:,int(y),:]
+    else:
+        matriz = img[int(x),:,:]
+
+   
+    print(f_type)
+    edges = edges_by_derivatives(matriz)
+    if f_type == "meandiff":
+        edges = (edges_by_meandiff(matriz))
+    if f_type == "2derivatives":
+        edges = edges_by_2derivatives(matriz)
+
+    imagen_webp = imageio.imwrite("<bytes>", edges, format="webp", lossless=True, method=6)
+    output_filename = "draft.webp"
+    
+# Save the WebP image to the output directory
+    with open(os.path.join("cache", output_filename), "wb") as f:
+        f.write(imagen_webp)
+    return send_file("cache/draft.webp", mimetype="image/webp")
 
 @app.route('/')
 def page():

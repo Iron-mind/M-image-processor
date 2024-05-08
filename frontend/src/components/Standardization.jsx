@@ -6,6 +6,7 @@ import { IntensityRescaling } from './IntensityRescaling';
 import { HistogramMatching } from './HistogramMatching';
 import { WhiteStripe } from './WhiteStripe';
 import { Denoising } from './Denoising';
+import { Edges } from './Edges';
 
 const Standardization = () => {
     const [sliderValuex, setSliderValuex] = useState(100); // Valor inicial del slider
@@ -13,6 +14,7 @@ const Standardization = () => {
     const [imageName, setImageName] = useState(localStorage.getItem('image')); // Estado para almacenar el nombre de la imagen
     const [referenceImage, setImage] = useState(null);
     const [loadingHM, setLoadingHM] = useState(false);
+    const [loadingEdges, setLoadingEdges] = useState(false);
     const [images, setImages] = useState({
       cenital: `http://localhost:8000/image/${imageName}?x=100`,
       sagital: `http://localhost:8000/image/${imageName}?y=100`
@@ -25,7 +27,9 @@ const Standardization = () => {
       whiteStripe: false,
         histogramMatching: false,
         denoising: false,
-        nb_len: 1
+        nb_len: 1,
+        edges: false,
+        edgesType: "derivatives"
     }); // Estado para almacenar el valor del input
     // Función para manejar el cambio en el slider
     const handleSliderChangex = (event) => {
@@ -104,6 +108,24 @@ const Standardization = () => {
                 setInput({ ...input, denoising: true });
             })
             .catch((error) => console.error(error)).finally(() => setLoadingDen(false));
+    };
+
+    const applyEdges = async (filter) => {
+        //settime out to simulate the time it takes to calculate the edges
+        setLoadingEdges(true);
+        setInput({ ...input, edges: false, edgesType: filter });
+
+        await new Promise(r => setTimeout(r, 2000));
+
+        setInput({ ...input, edges: true, edgesType: filter });
+        setLoadingEdges(false);
+        // fetch(`http://localhost:8000/image/edges/${imageName}?type=${filter}`)
+        //     .then((response) => response.json())
+        //     .then(() => {
+        //         alert("Edges applied");
+        //         setInput({ ...input, edges: true });
+        //     })
+        //     .catch((error) => console.error(error)).finally(() => setLoadingEdges(false));
     };
     const handleImageChange = () => {
         const file = document.getElementById("dropzone-file").files[0];
@@ -268,6 +290,26 @@ const Standardization = () => {
                             White Stripe
                         </button>
                     </div>
+                <div className='flex flex-col w-[300px]'>
+                    <button
+                        onClick={() => applyEdges("derivatives")}
+                        className='mx-4 my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
+                        Edges by derivatives
+                    </button>
+                    <button
+                        onClick={() => applyEdges("meandiff")}
+                        className='mx-4 my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
+                        Edges by difference with mean
+                    </button>
+                    <button
+                        onClick={() => applyEdges("2derivatives")}
+                        className='mx-4 my-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded'>
+                        Find concavities
+                    </button>
+
+                    {loadingEdges && <span className='text-black'>Calculating...</span>}
+
+                </div>
                     
             </div>
             <div className='flex flex-row'>
@@ -280,7 +322,17 @@ const Standardization = () => {
                     </>
                 }
             </div>
-                <div className='flex flex-row'>
+            <div className='flex flex-row'>
+                {
+                    !loadingEdges &&
+                    <>
+                        {input.edges &&
+                            <Edges type={input.edgesType} />
+                        }
+                    </>
+                }
+            </div>
+            <div className='flex flex-row'>
                         {input.intensityRescaling && <IntensityRescaling/>}
                 </div>
                 <div className='flex flex-row'>
@@ -292,9 +344,10 @@ const Standardization = () => {
                 </div>
                 <div className='flex flex-row'>
                         {input.whiteStripe && <WhiteStripe/>}
-                </div>
-                
-			</div>
+            </div>
+        </div>
+
+
 		);
   };
 

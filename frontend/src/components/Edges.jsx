@@ -1,16 +1,15 @@
-
 import { useState } from 'react';
 import Navbar from './Navbar';
 
 
-export const Denoising = () => {
+export const Edges = ({ type }) => {
   const [sliderValuex, setSliderValuex] = useState(100); // Valor inicial del slider
   const [sliderValuey, setSliderValuey] = useState(100); // Valor inicial del slider
-  const [imageName, setImageName] = useState("denoising-res.nii"); // Estado para almacenar el nombre de la imagen
   const filenamePrev = localStorage.getItem("image");
+  const [imageName, setImageName] = useState(filenamePrev); // Estado para almacenar el nombre de la imagen
   const [images, setImages] = useState({
-    cenital: `http://localhost:8000/image/${imageName}?x=100`,
-    sagital: `http://localhost:8000/image/${imageName}?y=100`,
+    cenital: `http://localhost:8000/image/edges/${imageName}?x=100&type=${type}`,
+    sagital: `http://localhost:8000/image/edges/${imageName}?y=100&type=${type}`,
   });
 
 
@@ -26,7 +25,7 @@ export const Denoising = () => {
 
     const newImages = {
       ...images,
-      cenital: `http://localhost:8000/image/${imageName}?x=${value}`,
+      cenital: `http://localhost:8000/image/edges/${imageName}?x=${value}&type=${type}`,
     };
     setImages(newImages);
   };
@@ -38,7 +37,7 @@ export const Denoising = () => {
 
     const newImages = {
       ...images,
-      sagital: `http://localhost:8000/image/${imageName}?y=${value}`,
+      sagital: `http://localhost:8000/image/edges/${imageName}?y=${value}&type=${type}`,
     };
     setImages(newImages);
   };
@@ -46,7 +45,7 @@ export const Denoising = () => {
   return (
     <div className="flex flex-col items-center justify-center mt-9">
       <Navbar />
-      <h1 className="text-lg font-bold text-black m-4">Denoising</h1>
+      <h1 className="text-lg font-bold text-black m-4">Edges</h1>
       <div className="flex justify-center mb-4">
         <div className="mr-4">
           {images.cenital && (

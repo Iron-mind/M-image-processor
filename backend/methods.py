@@ -4,6 +4,10 @@ from matplotlib import pyplot as plt
 import numpy as np
 import nibabel as nib
 import scipy.stats as sp
+import scipy
+import SimpleITK as sitk
+import os
+
 def scale_matrix(matrix):
     scaled_matrix = (matrix - matrix.min()) * (255 / (matrix.max() - matrix.min()))
     return np.clip(scaled_matrix,0,255)
@@ -349,3 +353,90 @@ def denoising_filter(img:np.ndarray, vicinity_len=1, fn=np.mean):
           current_vicinity = []
    return new_img
 
+
+def edges_by_derivatives(img):
+  kernel = np.array([[0,0,0], [-1,0,1],[0,0,0]])/2 #bordes sobre el eje x
+ 
+  img_filt = scipy.ndimage.convolve(img, kernel)
+  
+  kernel_y = np.array([[0,-1,0], [0,0,0],[0,1,0]])/2 #bordes sobre el eje y
+  img_filt_y = scipy.ndimage.convolve(img, kernel_y)
+  img_edges = np.sqrt(img_filt**2 + img_filt_y**2)
+  return img_edges
+
+def edges_by_2derivatives(img):
+   
+  kernel_y = np.array([[0,0,0], [-1,0,1],[0,0,0]])/2
+  kernel_x = np.array([[0,-1,0], [0,0,0],[0,1,0]])/2
+
+  dx = scipy.ndimage.convolve(img, kernel_x)
+  ddx = scipy.ndimage.convolve(dx, kernel_x)
+  dxy = scipy.ndimage.convolve(dx, kernel_y)
+  dy = scipy.ndimage.convolve(img, kernel_y)
+  ddy = scipy.ndimage.convolve(img, kernel_y)
+  img_edges = np.sqrt(ddx**2+dxy**2+ddy**2)
+  return img_edges
+
+def edges_by_meandiff(img):
+  kernel = np.array([[1,1,1], [1,1,1],[1,1,1]])/9
+  img_filt = scipy.ndimage.convolve(img, kernel) - img
+  
+  img_edges = img_filt
+  return img_edges
+
+
+def registration_itk(fixed_img_p, moving_img_p):
+  fixed_image = sitk.ReadImage(fixed_img_p, sitk.sitkFloat32)
+  moving_image = sitk.ReadImage(moving_img_p, sitk.sitkFloat32)
+  initial_transform = sitk.CenteredTransformInitializer(
+    fixed_image,
+    moving_image,
+    sitk.Euler3DTransform(),
+    sitk.CenteredTransformInitializerFilter.GEOMETRY,
+    )
+  registration_method = sitk.ImageRegistrationMethod()
+  registration_method = sitk.ImageRegistrationMethod()
+
+  # Similarity metric settings.
+  registration_method.SetMetricAsMattesMutualInformation(numberOfHistogramBins=50)
+  registration_method.SetMetricSamplingStrategy(registration_method.RANDOM)
+  registration_method.SetMetricSamplingPercentage(0.01)
+
+  registration_method.SetInterpolator(sitk.sitkLinear)
+
+  # Optimizer settings.
+  registration_method.SetOptimizerAsGradientDescent(
+      learningRate=1.0,
+      numberOfIterations=100,
+      convergenceMinimumValue=1e-6,
+      convergenceWindowSize=10,
+  )
+  registration_method.SetOptimizerScalesFromPhysicalShift()
+
+  registration_method.SetInitialTransform(initial_transform, inPlace=False)
+
+
+  final_transform = registration_method.Execute(fixed_image, moving_image)
+
+  # Always check the reason optimization terminated.
+  print("Final metric value: {0}".format(registration_method.GetMetricValue()))
+  print(
+      "Optimizer's stopping condition, {0}".format(
+          registration_method.GetOptimizerStopConditionDescription()
+      )
+  )
+  moving_resampled = sitk.Resample(
+    moving_image,
+    fixed_image,
+    final_transform,
+    sitk.sitkLinear,
+    0.0,
+    moving_image.GetPixelID(),
+)
+  sitk.WriteImage(
+      moving_resampled, os.path.join("/cache", "registration-res.nii")
+  )
+  sitk.WriteTransform(
+      final_transform, os.path.join("/cache", "registration-res.tfm")
+  )
+  return True
