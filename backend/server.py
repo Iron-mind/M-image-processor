@@ -9,7 +9,7 @@ import nibabel as nib
 import numpy as np
 import os
 from flask_cors import CORS
-from methods import denoising_filter, edges_by_2derivatives, edges_by_derivatives, edges_by_meandiff, histogram_matching, intensity_rescaling, isodata, k_means, region_growing, region_growing_3d, registration_itk, save_nii, scale_matrix, white_stripe, z_score_transform
+from methods import denoising_filter, edges_by_2derivatives, edges_by_derivatives, edges_by_meandiff, histogram_matching, intensity_rescaling, isodata, k_means, region_growing, region_growing_3d, registration_itk, save_nii, scale_matrix, segment_image, white_stripe, z_score_transform
 
 app = Flask(__name__, static_folder='dist/assets', template_folder='dist')
 
@@ -381,10 +381,60 @@ def apply_registration(filename):
     
     return jsonify({"msg":"Registration"})
 
+
+@app.route("/image/<filename>/laplace", methods=["POST"])
+def apply_laplace(filename):
+    points = []
+    x = None
+    y = None
+    if request.method == "POST":
+        try:
+            
+            img = nib.load("./cache/"+filename)
+            data = request.json
+            view = data["view"]
+            if view == "cenital":
+                x = data["x"]
+            else :
+                y = data["y"]
+            points = data["points"]
+            green_points = data["greenPoints"]
+            # print(data)
+        except KeyError as e :
+            print(e)
+            
+        img = img.get_fdata()
+        
+        points = [(round(p[1]/3), round(p[0]/3)) for p in points] # /3 because the image is 3 times bigger than the original from frontend
+        green_points = [(round(p[1]/3), round(p[0]/3)) for p in green_points] # /3 because the image is 3 times bigger than the original from frontend
+
+        # Selecciona la matriz deseada
+        if y is not None:
+            matriz = img[:,int(y),:]
+            res2d = segment_image(scale_matrix(matriz), green_points,points )
+            
+            
+        else:
+            
+            matriz = img[int(x),:,:]
+            res2d = segment_image(scale_matrix(matriz), green_points,points )
+            
+            
+
+        plt.imshow(res2d)
+        random_name = "draft_g-"+str(np.random.randint(0,20))+".jpg"
+        plt.savefig('./cache/'+random_name)
+        # Convierte la matriz a una imagen WebP
+        
+        return  jsonify({"msg":"Region growing", "filename":random_name})
+
+
+
 @app.route('/')
 def page():
     return render_template( 'index.html')
   
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000, debug=True)

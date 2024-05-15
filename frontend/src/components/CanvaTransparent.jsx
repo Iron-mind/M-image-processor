@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 
-const AnnotationCanvas = ({addPoint, view}) => {
+const AnnotationCanvas = ({ addPoint, view, color }) => {
   const canvasRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [prevPos, setPrevPos] = useState({ x: 0, y: 0 });
@@ -26,7 +26,7 @@ const AnnotationCanvas = ({addPoint, view}) => {
     const ctx = canvas.getContext('2d');
 
     // Establecer color inicial
-    ctx.strokeStyle = 'red';
+    ctx.strokeStyle = color || 'red';
     ctx.lineWidth = 8;
 
     const handleMouseDown = (event) => {

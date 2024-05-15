@@ -33,9 +33,14 @@ const Navbar = () => {
 										Filter and Standardizations
 									</Link>
 									<Link
-										to="/edges"
+										to="/registration"
 										className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
 									>Registration
+									</Link>
+									<Link
+										to="/laplace-segmentation"
+										className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+									>Laplace Segmentation
 									</Link>
 								</div>
 							</div>

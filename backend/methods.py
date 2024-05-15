@@ -7,6 +7,11 @@ import scipy.stats as sp
 import scipy
 import SimpleITK as sitk
 import os
+import numpy as np
+from scipy.sparse import lil_matrix, diags
+from scipy.sparse.linalg import spsolve
+import cv2  # Si necesitas cargar/guardar imágenes
+
 
 def scale_matrix(matrix):
     scaled_matrix = (matrix - matrix.min()) * (255 / (matrix.max() - matrix.min()))
@@ -391,7 +396,7 @@ def registration_itk(fixed_img_p, moving_img_p):
   initial_transform = sitk.CenteredTransformInitializer(
     fixed_image,
     moving_image,
-    sitk.Euler3DTransform(),
+    sitk.AffineTransform(3),
     sitk.CenteredTransformInitializerFilter.GEOMETRY,
     )
   registration_method = sitk.ImageRegistrationMethod()
@@ -439,3 +444,61 @@ def registration_itk(fixed_img_p, moving_img_p):
   )
 
   return True
+
+
+def construct_laplacian(image):
+    height, width = image.shape
+    num_pixels = height * width
+    L = lil_matrix((num_pixels, num_pixels))
+
+    for y in range(height):
+        for x in range(width):
+            index = y * width + x
+
+            if x > 0:
+                L[index, index] += 1
+                L[index, index - 1] = -1
+            if x < width - 1:
+                L[index, index] += 1
+                L[index, index + 1] = -1
+            if y > 0:
+                L[index, index] += 1
+                L[index, index - width] = -1
+            if y < height - 1:
+                L[index, index] += 1
+                L[index, index + width] = -1
+
+    return L
+
+def points_to_indices(points, width):
+    return [y * width + x for y, x in points]
+
+
+def segment_image(image, green_points, points):
+    height, width = image.shape
+    num_pixels = height * width
+
+    L = construct_laplacian(image)
+    green_indices = points_to_indices(green_points, width)
+    bg_indices = points_to_indices(points, width)
+
+    b = np.zeros(num_pixels)
+    for idx in green_indices:
+        b[idx] = 1
+    for idx in bg_indices:
+        b[idx] = -1
+
+    D = diags([1 if i in green_indices + bg_indices else 0 for i in range(num_pixels)], 0)
+    L_prime = L + D
+    solution = spsolve(L_prime, b)
+
+    segmented_image = np.zeros_like(image)
+    for i in range(num_pixels):
+        y, x = divmod(i, width)
+        if solution[i] > 0:
+            segmented_image[y, x] = image[y, x]
+        else:
+            segmented_image[y, x] = 255
+
+    return segmented_image
+

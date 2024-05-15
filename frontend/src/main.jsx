@@ -7,6 +7,7 @@ import ImageViewer from './components/ImageViewer.jsx';
 import Drawer from './components/Drawer.jsx';
 import Standardization from './components/Standardization.jsx';
 import Registration from './components/Registration.jsx';
+import LaplaceSegmentation from './components/LaplaceSegmentation.jsx';
 const router = createBrowserRouter([
   {
     path: "/",
@@ -26,8 +27,12 @@ const router = createBrowserRouter([
     element: <Standardization />,
   },
   {
-    path: "/edges/",
+    path: "/registration/",
     element: <Registration />,
+  },
+  {
+    path: "/laplace-segmentation/",
+    element: <LaplaceSegmentation />,
   },
   {
     path: "/*",
