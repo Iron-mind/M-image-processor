@@ -3,5 +3,7 @@ imageio
 nibabel
 matplotlib
 numpy
+scipy
+opencv-python
 flask-cors
 SimpleITK

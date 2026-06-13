@@ -1,6 +1,8 @@
 # M-image-processor
 Medical image viewer and processor
 
+![Preview](./preview.png)
+
 ## Installation
 1. Install backend requirements - go to the backend folder and run the following command:
 ```bash
@@ -14,6 +16,7 @@ npm install
 ## Usage
 1. Run the backend server - go to the backend folder and run the following command:
 ```bash
+mkdir cache
 python server.py
 ```
 
